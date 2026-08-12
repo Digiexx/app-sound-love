@@ -166,3 +166,40 @@ function formatTime(sec) {
 }
 
 window.addEventListener('DOMContentLoaded', initApp);
+
+// Lógica para exibir o Popup de Instalação PWA
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+const installBtn = document.getElementById('install-btn');
+const closeBanner = document.getElementById('close-banner');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o navegador de mostrar o prompt nativo automático (para mostrarmos o nosso personalizado)
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Exibe o nosso banner/popup
+    if (installBanner) {
+        installBanner.style.display = 'block';
+    }
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('Usuário aceitou instalar o app');
+            }
+            deferredPrompt = null;
+            installBanner.style.display = 'none';
+        }
+    });
+}
+
+if (closeBanner) {
+    closeBanner.addEventListener('click', () => {
+        installBanner.style.display = 'none';
+    });
+}

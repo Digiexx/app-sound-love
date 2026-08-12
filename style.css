@@ -1,3 +1,21 @@
+/* Fundo customizado com design moderno, gradiente e padrão elegante */
+body {
+    background-color: #0b0f19;
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(255, 42, 117, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(138, 43, 226, 0.15) 0%, transparent 40%),
+        linear-gradient(135deg, #0b0f19 0%, #1a1f2c 100%);
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -248,4 +266,89 @@ body {
 .control-btn:hover, .sub-control:hover {
     color: #ff2a75;
     transform: scale(1.1);
+}
+
+/* Estilo do Banner/Popup de Instalação PWA */
+.install-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 380px;
+    background: #1a1f2c;
+    border: 1px solid #ff2a75;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    padding: 15px;
+    animation: slideUp 0.4s ease-out;
+}
+
+.install-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.install-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.install-text {
+    flex-grow: 1;
+}
+
+.install-text h3 {
+    font-size: 15px;
+    color: #fff;
+    margin: 0 0 2px 0;
+}
+
+.install-text p {
+    font-size: 12px;
+    color: #a0aec0;
+    margin: 0;
+}
+
+#install-btn {
+    background: #ff2a75;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#install-btn:hover {
+    background: #e02063;
+}
+
+#close-banner {
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: -10px;
+    right: -5px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
