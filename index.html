@@ -13,65 +13,73 @@
 </head>
 <body>
 
-    
-
-    <div class="phone-frame">
-        <div class="app-container">
-            <!-- Topo -->
-            <header class="app-header">
-                <i class="fa-solid fa-chevron-left"></i>
-                <span>NOW PLAYING</span>
-                <i class="fa-solid fa-ellipsis-vertical"></i>
-            </header>
-
-            <!-- Categorias / Abas -->
-            <div class="categories-nav">
-                <button class="cat-btn active" data-category="favoritas">Favoritas</button>
-                <button class="cat-btn" data-category="massagem">Massagem</button>
-                <button class="cat-btn" data-category="prazer">Gozar</button>
-                <button class="cat-btn" data-category="todas">Todas</button>
-            </div>
-
-            <!-- Capa do Álbum Estilo Vinil/Neon -->
-            <div class="vinyl-section">
-                <div class="vinyl-disc">
-                    <img id="album-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60" alt="Capa">
-                    <div class="vinyl-center"></div>
-                </div>
-            </div>
-
-            <!-- Info da Música -->
-            <div class="track-info">
-                <h2 id="current-title">Sensual Night</h2>
-                <p id="current-artist">Sound Love Beats</p>
-            </div>
-
-            <!-- Lista de Músicas da Categoria (Ocultável/Deslizável) -->
-            <div class="playlist-container" id="song-list">
-                <!-- Preenchido via JS -->
-            </div>
-
-            <!-- Controles e Player -->
-            <div class="player-footer">
-                <div class="progress-area">
-                    <span id="current-time">0:00</span>
-                    <div class="progress-bar" id="progress-bar">
-                        <div class="progress" id="progress"></div>
-                    </div>
-                    <span id="duration">0:00</span>
-                </div>
-
-                <div class="player-controls">
-                    <button class="sub-control"><i class="fa-solid fa-shuffle"></i></button>
-                    <button id="prev-btn" class="control-btn"><i class="fa-solid fa-backward-step"></i></button>
-                    <button id="play-pause-btn" class="control-btn main-play"><i class="fa-solid fa-play"></i></button>
-                    <button id="next-btn" class="control-btn"><i class="fa-solid fa-forward-step"></i></button>
-                    <button class="sub-control"><i class="fa-solid fa-repeat"></i></button>
-                </div>
-            </div>
-            
-            <audio id="audio-element"></audio>
+    <!-- TELA DE BLOQUEIO POR SENHA -->
+    <div id="lock-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b0f19; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
+        <div style="background: #1a1f2c; padding: 30px; border-radius: 20px; border: 1px solid #ff2a75; max-width: 350px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+            <h2 style="color: #fff; font-size: 1.2rem; margin-bottom: 10px;">Área Restrita 🔒</h2>
+            <p style="color: #a0aec0; font-size: 0.85rem; margin-bottom: 20px;">Digite a senha para liberar o app:</p>
+            <input type="password" id="app-password" placeholder="Sua senha" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #121622; color: #fff; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none;">
+            <button id="unlock-btn" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #ff2a75; color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer;">Entrar</button>
+            <p id="error-msg" style="color: #ff2a75; font-size: 0.75rem; margin-top: 10px; display: none;">Senha incorreta!</p>
         </div>
+    </div>
+
+    <!-- CONTAINER PRINCIPAL (TELA CHEIA) -->
+    <div class="app-container">
+        <!-- Topo -->
+        <header class="app-header">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span>Sound Love Playing</span>
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </header>
+
+        <!-- Categorias / Abas -->
+        <div class="categories-nav">
+            <button class="cat-btn active" data-category="favoritas">Favoritas</button>
+            <button class="cat-btn" data-category="massagem">Massagem</button>
+            <button class="cat-btn" data-category="prazer">Gozar</button>
+            <button class="cat-btn" data-category="todas">Todas</button>
+        </div>
+
+        <!-- Capa do Álbum Estilo Vinil/Neon -->
+        <div class="vinyl-section">
+            <div class="vinyl-disc">
+                <img id="album-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60" alt="Capa">
+                <div class="vinyl-center"></div>
+            </div>
+        </div>
+
+        <!-- Info da Música -->
+        <div class="track-info">
+            <h2 id="current-title">Sensual Night</h2>
+            <p id="current-artist">Sound Love Beats</p>
+        </div>
+
+        <!-- Lista de Músicas da Categoria -->
+        <div class="playlist-container" id="song-list">
+            <!-- Preenchido via JS -->
+        </div>
+
+        <!-- Controles e Player -->
+        <div class="player-footer">
+            <div class="progress-area">
+                <span id="current-time">0:00</span>
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <span id="duration">0:00</span>
+            </div>
+
+            <div class="player-controls">
+                <button class="sub-control"><i class="fa-solid fa-shuffle"></i></button>
+                <button id="prev-btn" class="control-btn"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="play-pause-btn" class="control-btn main-play"><i class="fa-solid fa-play"></i></button>
+                <button id="next-btn" class="control-btn"><i class="fa-solid fa-forward-step"></i></button>
+                <button class="sub-control"><i class="fa-solid fa-repeat"></i></button>
+            </div>
+        </div>
+        
+        <audio id="audio-element"></audio>
     </div>
 
     <!-- Popup / Banner de Instalação Customizado -->
@@ -80,13 +88,33 @@
             <img src="imagens/icon.png" alt="Ícone" class="install-icon">
             <div class="install-text">
                 <h3>Instalar Sound Love</h3>
-                <p>Adicione à tela inicial para acesso rápido!</p>
+                <p>Instale Agora para Aproveitar Cada Segundo Desse Prazer!</p>
             </div>
             <button id="install-btn">Instalar</button>
             <button id="close-banner">&times;</button>
         </div>
     </div>
 
+    <!-- SCRIPTS DO APP E DA SENHA -->
     <script src="script.js"></script>
+    <script>
+        // Lógica de verificação de senha
+        if (localStorage.getItem("app_liberado") === "true") {
+            document.getElementById('lock-screen').style.display = 'none';
+        }
+
+        document.getElementById('unlock-btn').addEventListener('click', () => {
+            const pass = document.getElementById('app-password').value;
+            const senhaCorreta = "Dayenne"; // Altere a senha aqui se preferir
+            
+            if (pass === senhaCorreta) {
+                localStorage.setItem("app_liberado", "true");
+                document.getElementById('lock-screen').style.display = 'none';
+            } else {
+                const error = document.getElementById('error-msg');
+                error.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>
