@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Love - Player</title>
+    <link rel="icon" type="image/png" href="imagens/icon.png">
+    <link rel="manifest" href="manifest.json">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    
+
+    <div class="phone-frame">
+        <div class="app-container">
+            <!-- Topo -->
+            <header class="app-header">
+                <i class="fa-solid fa-chevron-left"></i>
+                <span>NOW PLAYING</span>
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </header>
+
+            <!-- Categorias / Abas -->
+            <div class="categories-nav">
+                <button class="cat-btn active" data-category="favoritas">Favoritas</button>
+                <button class="cat-btn" data-category="massagem">Massagem</button>
+                <button class="cat-btn" data-category="prazer">Gozar</button>
+                <button class="cat-btn" data-category="todas">Todas</button>
+            </div>
+
+            <!-- Capa do Álbum Estilo Vinil/Neon -->
+            <div class="vinyl-section">
+                <div class="vinyl-disc">
+                    <img id="album-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60" alt="Capa">
+                    <div class="vinyl-center"></div>
+                </div>
+            </div>
+
+            <!-- Info da Música -->
+            <div class="track-info">
+                <h2 id="current-title">Sensual Night</h2>
+                <p id="current-artist">Sound Love Beats</p>
+            </div>
+
+            <!-- Lista de Músicas da Categoria (Ocultável/Deslizável) -->
+            <div class="playlist-container" id="song-list">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <!-- Controles e Player -->
+            <div class="player-footer">
+                <div class="progress-area">
+                    <span id="current-time">0:00</span>
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <span id="duration">0:00</span>
+                </div>
+
+                <div class="player-controls">
+                    <button class="sub-control"><i class="fa-solid fa-shuffle"></i></button>
+                    <button id="prev-btn" class="control-btn"><i class="fa-solid fa-backward-step"></i></button>
+                    <button id="play-pause-btn" class="control-btn main-play"><i class="fa-solid fa-play"></i></button>
+                    <button id="next-btn" class="control-btn"><i class="fa-solid fa-forward-step"></i></button>
+                    <button class="sub-control"><i class="fa-solid fa-repeat"></i></button>
+                </div>
+            </div>
+            
+            <audio id="audio-element"></audio>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
