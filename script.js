@@ -424,6 +424,10 @@ const paginasMenu = [
                 <span aria-hidden="true">›</span>
             </button>
 
+            <p class="painel-sound-rodape">
+                Sua escolha de tema fica salva neste navegador.
+            </p>
+
             <div class="ajustes-efeitos">
 
                 <h3>Efeitos visuais</h3>
@@ -510,9 +514,7 @@ const paginasMenu = [
 
             </div>
 
-            <p class="painel-sound-rodape">
-                Sua escolha de tema fica salva neste navegador.
-            </p>
+
         `;
 
         painel

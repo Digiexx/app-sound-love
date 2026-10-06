@@ -18,10 +18,22 @@ self.addEventListener("activate", (evento) => {
 
 self.addEventListener("fetch", (evento) => {
 
-    if (evento.request.method !== "GET") {
+    const requisicao = evento.request;
+
+    if (requisicao.method !== "GET") {
         return;
     }
 
-    evento.respondWith(fetch(evento.request));
+    const endereco = new URL(requisicao.url);
+
+    if (endereco.origin !== self.location.origin) {
+        return;
+    }
+
+    evento.respondWith(
+        fetch(requisicao, {
+            cache: "no-cache"
+        })
+    );
 
 });
