@@ -989,6 +989,18 @@ function paginaPlayer() {
 
                 ${capaPlayer(musica, "album")}
 
+                <div
+                    class="player-particulas"
+                    aria-hidden="true"
+                >
+                    <span style="--x:12%; --tempo:9s; --atraso:-3s; --tamanho:3px"></span>
+                    <span style="--x:28%; --tempo:12s; --atraso:-8s; --tamanho:5px"></span>
+                    <span style="--x:45%; --tempo:10s; --atraso:-5s; --tamanho:3px"></span>
+                    <span style="--x:63%; --tempo:14s; --atraso:-10s; --tamanho:4px"></span>
+                    <span style="--x:78%; --tempo:11s; --atraso:-2s; --tamanho:3px"></span>
+                    <span style="--x:90%; --tempo:13s; --atraso:-7s; --tamanho:5px"></span>
+                </div>
+
             </div>
 
             <div class="player-conteudo">
@@ -1616,6 +1628,119 @@ document.addEventListener("input", evento => {
 
        
 
+    function abrirPainelClimas() {
+
+        let painel =
+            document.getElementById("painel-climas");
+
+        if (!painel) {
+
+            painel = document.createElement("dialog");
+
+            painel.id = "painel-climas";
+
+            painel.setAttribute(
+                "aria-labelledby",
+                "titulo-painel-climas"
+            );
+
+            painel.innerHTML = `
+                <form method="dialog" class="climas-fechar">
+
+                    <button
+                        type="submit"
+                        aria-label="Fechar opções de clima"
+                    >
+                        ×
+                    </button>
+
+                </form>
+
+                <h2 id="titulo-painel-climas">
+                    Seu clima hoje
+                </h2>
+
+                <p class="climas-subtitulo">
+                    Como você quer sentir a música?
+                </p>
+
+                <div class="climas-grid">
+
+                    <button
+                        type="button"
+                        class="clima-card clima-desejo"
+                        data-action="select-mood"
+                        data-id="desejo"
+                    >
+                        <span class="clima-imagem"></span>
+
+                        <span class="clima-texto">
+                            <strong>Desejo</strong>
+                            <small>Sinta a intensidade.</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clima-card clima-paixao"
+                        data-action="select-mood"
+                        data-id="paixao"
+                    >
+                        <span class="clima-imagem"></span>
+
+                        <span class="clima-texto">
+                            <strong>Paixão</strong>
+                            <small>A noite é nossa.</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clima-card clima-carinho"
+                        data-action="select-mood"
+                        data-id="carinho"
+                    >
+                        <span class="clima-imagem"></span>
+
+                        <span class="clima-texto">
+                            <strong>Carinho</strong>
+                            <small>Mais perto, com carinho.</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clima-card clima-prazer"
+                        data-action="select-mood"
+                        data-id="prazer"
+                    >
+                        <span class="clima-imagem"></span>
+
+                        <span class="clima-texto">
+                            <strong>Prazer</strong>
+                            <small>Aproveite cada instante.</small>
+                        </span>
+                    </button>
+
+                </div>
+
+                <p class="climas-rodape">
+                    A música continua. O clima muda.
+                </p>
+            `;
+
+            document.body.appendChild(painel);
+
+        }
+
+        if (!painel.open) {
+
+            painel.showModal();
+
+        }
+
+    }
+
     function executarAcao(acao, id) {
 
         switch (acao) {
@@ -1642,6 +1767,68 @@ document.addEventListener("input", evento => {
 
                 document.getElementById("search")?.focus();
                 break;
+
+            case "open-themes":
+
+                abrirPainelClimas();
+
+                document
+                    .querySelectorAll(
+                        "#painel-climas .clima-card"
+                    )
+                    .forEach((cartao) => {
+
+                        cartao.setAttribute(
+                            "aria-pressed",
+                            String(
+                                cartao.dataset.id ===
+                                document.documentElement.dataset.clima
+                            )
+                        );
+
+                    });
+
+                break;
+
+            case "select-mood": {
+
+                const climasPermitidos = [
+                    "desejo",
+                    "paixao",
+                    "carinho",
+                    "prazer"
+                ];
+
+                if (!climasPermitidos.includes(id)) {
+                    break;
+                }
+
+                document.documentElement.dataset.clima = id;
+
+                dados.tema = id;
+
+                salvarDados();
+
+                document
+                    .querySelectorAll(
+                        "#painel-climas .clima-card"
+                    )
+                    .forEach((cartao) => {
+
+                        cartao.setAttribute(
+                            "aria-pressed",
+                            String(cartao.dataset.id === id)
+                        );
+
+                    });
+
+                document
+                    .getElementById("painel-climas")
+                    ?.close();
+
+                break;
+
+            }
 
             case "settings":
 
@@ -1823,6 +2010,11 @@ case "retry-track":
        ===================================== */
 
     carregarDados();
+
+    document.documentElement.dataset.clima =
+        ["desejo", "paixao", "carinho", "prazer"].includes(dados.tema)
+            ? dados.tema
+            : "carinho";
 
 // Prepara a primeira preferida, sem tocar automaticamente.
 {

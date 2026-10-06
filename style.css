@@ -533,6 +533,73 @@ header button {
     background: transparent;
 }
 
+#mini .row button.play {
+    position: relative;
+    isolation: isolate;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+
+    flex-shrink: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    color: var(--bg);
+    font-size: 16px;
+
+    overflow: visible;
+}
+
+#mini .row button.play::before,
+#mini .row button.play::after {
+    content: "";
+
+    position: absolute;
+    inset: -4px;
+
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+
+    pointer-events: none;
+    opacity: 0;
+}
+
+#mini .row button.play[aria-label="Pausar"] {
+    box-shadow:
+        0 0 18px var(--glow),
+        0 0 38px var(--glow);
+}
+
+#mini .row button.play[aria-label="Pausar"]::before,
+#mini .row button.play[aria-label="Pausar"]::after {
+    animation: sound-love-ondas 3.2s ease-out infinite;
+}
+
+#mini .row button.play[aria-label="Pausar"]::after {
+    animation-delay: 1.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mini .row button.play[aria-label="Pausar"]::before,
+    #mini .row button.play[aria-label="Pausar"]::after {
+        animation: none;
+    }
+}
+
 .heart {
     color: var(--muted);
 
@@ -1179,29 +1246,121 @@ dialog::backdrop {
 #toast {
     position: fixed;
 
-    bottom: 170px;
+    bottom: calc(
+        100px + env(safe-area-inset-bottom)
+    );
     left: 50%;
 
     z-index: 50;
 
     display: none;
 
-    max-width: 90%;
+    width: max-content;
+    max-width: calc(100vw - 40px);
+    box-sizing: border-box;
 
-    padding: 12px 22px;
+    padding: 16px 24px 16px 35px;
 
-    border-radius: 25px;
+    overflow: hidden;
+    isolation: isolate;
 
-    background: var(--text);
-    color: var(--bg);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+
+    background: rgba(18, 14, 20, 0.78);
+    color: #ff8cde;
+
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
 
     transform: translateX(-50%);
 
     text-align: center;
     font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+
+    pointer-events: none;
 
     box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.25);
+        0 14px 40px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(248, 0, 205, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    animation:
+        sound-toast-entrada 350ms ease-out both;
+}
+
+#toast::before {
+    content: "";
+
+    position: absolute;
+    top: 50%;
+    left: 15px;
+
+    width: 5px;
+    height: 18px;
+
+    border-radius: 999px;
+
+    background: var(--accent);
+
+    transform: translateY(-50%);
+
+    box-shadow:
+        0 0 10px var(--accent),
+        0 0 20px rgba(248, 0, 205, 0.35);
+}
+
+#toast::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        110deg,
+        transparent 30%,
+        rgba(255, 140, 222, 0.1) 48%,
+        transparent 65%
+    );
+
+    transform: translateX(-120%);
+
+    pointer-events: none;
+
+    animation:
+        sound-toast-brilho 1100ms ease-out 150ms both;
+}
+
+@keyframes sound-toast-entrada {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 12px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+@keyframes sound-toast-brilho {
+    from {
+        transform: translateX(-120%);
+    }
+
+    to {
+        transform: translateX(120%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #toast,
+    #toast::after {
+        animation: none;
+    }
 }
 
 
@@ -1780,4 +1939,794 @@ body {
         padding: 0 24px 28px;
     }
 
+}
+
+/* =====================================
+   ALINHAMENTO DOS ÍCONES DO CABEÇALHO
+   ===================================== */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.header-actions > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+
+    margin: 0;
+    padding: 0;
+
+    line-height: 1;
+}
+
+.header-actions > button svg {
+    display: block;
+    flex-shrink: 0;
+}
+/* =====================================
+   LOGO COM TIPOGRAFIA MAIS LEVE
+   ===================================== */
+
+.brand,
+.brand b {
+    font-weight: 400;
+}
+
+.brand {
+    letter-spacing: 0.8px;
+}
+
+/* =====================================
+   BOTÃO — SEU CLIMA HOJE
+   ===================================== */
+
+.header-actions .mood-trigger {
+    position: relative;
+    isolation: isolate;
+
+    width: 44px;
+    height: 44px;
+
+    color: var(--accent);
+    background: transparent;
+
+    border: none;
+    border-radius: 50%;
+}
+
+.mood-trigger::before {
+    content: "";
+
+    position: absolute;
+    inset: 5px;
+    z-index: -1;
+
+    border-radius: 50%;
+    background: var(--accent);
+
+    filter: blur(12px);
+    opacity: 0.14;
+
+    pointer-events: none;
+}
+
+.mood-trigger svg {
+    filter: drop-shadow(
+        0 0 5px var(--accent)
+    );
+
+    animation: sound-brasa 4s ease-in-out infinite;
+}
+
+.mood-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@keyframes sound-brasa {
+    0%,
+    100% {
+        opacity: 0.75;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mood-trigger svg {
+        animation: none;
+    }
+}
+
+/* =====================================
+   PAINEL — SEU CLIMA HOJE
+   ===================================== */
+
+#painel-climas {
+    box-sizing: border-box;
+
+    width: min(440px, calc(100vw - 28px));
+    max-width: none;
+    max-height: calc(100dvh - 40px);
+
+    margin: auto;
+    padding: 30px 20px 20px;
+
+    overflow-y: auto;
+
+    color: var(--text);
+    background: rgba(20, 16, 23, 0.88);
+
+    border: 1px solid var(--accent);
+    border-radius: 26px;
+
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.6),
+        0 0 35px var(--glow);
+
+    text-align: center;
+}
+
+#painel-climas[open] {
+    animation: clima-painel-entrada 280ms ease-out both;
+}
+
+#painel-climas::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+
+    -webkit-backdrop-filter: blur(9px);
+    backdrop-filter: blur(9px);
+}
+
+#painel-climas .climas-fechar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    margin: 0;
+}
+
+#painel-climas .climas-fechar button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+
+    font-size: 27px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#painel-climas h2 {
+    margin: 8px 0 6px;
+
+    font-family: Georgia, serif;
+    font-size: clamp(27px, 7vw, 34px);
+    font-weight: 400;
+}
+
+#painel-climas .climas-subtitulo {
+    margin: 0 0 24px;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#painel-climas .climas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#painel-climas .clima-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    min-width: 0;
+    min-height: 190px;
+    padding: 0;
+
+    overflow: hidden;
+
+    color: #fff;
+    background: #101014;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+
+    text-align: left;
+    cursor: pointer;
+
+    transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease,
+        transform 200ms ease;
+}
+
+#painel-climas .clima-imagem {
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 70% 25%,
+            var(--clima-luz),
+            transparent 38%
+        ),
+        linear-gradient(
+            145deg,
+            var(--clima-fundo),
+            #09090c
+        );
+}
+
+#painel-climas .clima-imagem::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        to bottom,
+        transparent 20%,
+        rgba(0, 0, 0, 0.85) 100%
+    );
+}
+
+#painel-climas .clima-desejo {
+    --clima-luz: #ef3458;
+    --clima-fundo: #490c19;
+}
+
+#painel-climas .clima-paixao {
+    --clima-luz: #a9a9b2;
+    --clima-fundo: #151519;
+}
+
+#painel-climas .clima-carinho {
+    --clima-luz: #f3cbd3;
+    --clima-fundo: #60434b;
+}
+
+#painel-climas .clima-prazer {
+    --clima-luz: #fab2d7;
+    --clima-fundo: #62334f;
+}
+
+#painel-climas .clima-texto {
+    position: relative;
+    z-index: 1;
+
+    display: block;
+    padding: 16px 12px;
+}
+
+#painel-climas .clima-texto::before {
+    content: "";
+
+    display: block;
+
+    width: 22px;
+    height: 5px;
+    margin-bottom: 12px;
+
+    border-radius: 999px;
+    background: var(--clima-luz);
+
+    box-shadow: 0 0 12px var(--clima-luz);
+}
+
+#painel-climas .clima-texto strong {
+    display: block;
+
+    font-family: Georgia, serif;
+    font-size: clamp(18px, 5vw, 23px);
+    font-weight: 400;
+}
+
+#painel-climas .clima-texto small {
+    display: block;
+    margin-top: 7px;
+
+    color: #d2ccd3;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+#painel-climas .clima-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--clima-luz);
+}
+
+#painel-climas .clima-card[aria-pressed="true"] {
+    border-color: var(--clima-luz);
+
+    box-shadow:
+        0 0 0 1px var(--clima-luz),
+        0 0 20px var(--glow);
+}
+
+#painel-climas .clima-card[aria-pressed="true"]::after {
+    content: "✓";
+
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+
+    display: grid;
+    place-items: center;
+
+    width: 25px;
+    height: 25px;
+
+    color: #080808;
+    background: var(--clima-luz);
+    border-radius: 50%;
+
+    font-size: 15px;
+}
+
+#painel-climas button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+#painel-climas .climas-rodape {
+    margin: 22px 0 0;
+
+    color: var(--muted);
+    font-family: Georgia, serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+@keyframes clima-painel-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #painel-climas[open] {
+        animation: none;
+    }
+
+    #painel-climas .clima-card {
+        transition: none;
+    }
+}
+
+/* =====================================
+   TEMAS — TIPOGRAFIA E TÍTULO
+   ===================================== */
+
+#painel-climas,
+#painel-climas button,
+#painel-climas h2,
+#painel-climas .clima-texto strong,
+#painel-climas .climas-rodape {
+    font-family: inherit;
+}
+
+#painel-climas h2 {
+    margin: 12px 0 10px;
+
+    color: var(--text);
+
+    font-size: clamp(24px, 6vw, 30px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+}
+
+#painel-climas h2::before {
+    content: "";
+
+    display: block;
+
+    width: 32px;
+    height: 3px;
+    margin: 0 auto 16px;
+
+    border-radius: 999px;
+    background: var(--accent);
+
+    box-shadow:
+        0 0 10px var(--accent),
+        0 0 22px var(--glow);
+}
+
+#painel-climas .clima-texto strong {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+#painel-climas .climas-subtitulo,
+#painel-climas .climas-rodape {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* =====================================
+   FOTOS DOS TEMAS
+   ===================================== */
+
+#painel-climas .clima-card .clima-imagem {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#painel-climas .clima-desejo .clima-imagem {
+    background-image:
+        url("imagens/temas/desejo.webp"),
+        linear-gradient(145deg, #490c19, #09090c);
+}
+
+#painel-climas .clima-paixao .clima-imagem {
+    background-image:
+        url("imagens/temas/paixao.webp"),
+        linear-gradient(145deg, #25252b, #080808);
+}
+
+#painel-climas .clima-carinho .clima-imagem {
+    background-image:
+        url("imagens/temas/carinho.webp"),
+        linear-gradient(145deg, #60434b, #09090c);
+}
+
+#painel-climas .clima-prazer .clima-imagem {
+    background-image:
+        url("imagens/temas/prazer.webp"),
+        linear-gradient(145deg, #62334f, #09090c);
+}
+
+/* =====================================
+   PALETAS — SENTIMENTOS
+   ===================================== */
+
+:root[data-clima="desejo"] {
+    --bg: #100608;
+    --surface: #1c0c10;
+    --card: #291017;
+    --accent: #ef3458;
+    --accent2: #b91e40;
+    --text: #fff5f7;
+    --muted: #bda4ab;
+    --line: rgba(239, 52, 88, 0.14);
+    --glow: rgba(239, 52, 88, 0.2);
+}
+
+:root[data-clima="paixao"] {
+    --bg: #080808;
+    --surface: #121214;
+    --card: #1c1c20;
+    --accent: #c6c6d0;
+    --accent2: #90909f;
+    --text: #f6f6f8;
+    --muted: #a6a6af;
+    --line: rgba(255, 255, 255, 0.1);
+    --glow: rgba(198, 198, 208, 0.15);
+}
+
+:root[data-clima="carinho"] {
+    --bg: #110b0e;
+    --surface: #20151a;
+    --card: #2e1e25;
+    --accent: #f3cbd3;
+    --accent2: #d8a0ad;
+    --text: #fff5f8;
+    --muted: #c1a9b2;
+    --line: rgba(243, 203, 211, 0.14);
+    --glow: rgba(243, 203, 211, 0.18);
+}
+
+:root[data-clima="prazer"] {
+    --bg: #120912;
+    --surface: #211221;
+    --card: #301a2c;
+    --accent: #fab2d7;
+    --accent2: #df83b5;
+    --text: #fff3fa;
+    --muted: #c2a5b8;
+    --line: rgba(250, 178, 215, 0.14);
+    --glow: rgba(250, 178, 215, 0.2);
+}
+
+/* Notificação acompanha a paleta escolhida. */
+
+:root[data-clima] #toast {
+    color: var(--accent);
+    background: var(--surface);
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.45),
+        0 0 24px var(--glow);
+}
+
+:root[data-clima] #toast::before {
+    box-shadow:
+        0 0 10px var(--accent),
+        0 0 20px var(--glow);
+}
+
+:root[data-clima] #toast::after {
+    background: linear-gradient(
+        110deg,
+        transparent 30%,
+        var(--glow) 48%,
+        transparent 65%
+    );
+}
+
+/* Contraste do ícone sobre os botões claros. */
+
+:root[data-clima] .play {
+    color: var(--bg);
+}
+
+/* Carinho — paleta original do Sound Love */
+
+:root[data-clima="carinho"] {
+    --bg: #080808;
+    --surface: #121214;
+    --card: #1c1c20;
+
+    --accent: #f800cd;
+    --accent2: #ac36f2;
+
+    --text: #f6f6f8;
+    --muted: #a6a6af;
+
+    --line: rgba(248, 0, 205, 0.14);
+    --glow: rgba(248, 0, 205, 0.20);
+}
+
+#painel-climas .clima-carinho {
+    --clima-luz: #f800cd;
+    --clima-fundo: #280b24;
+}
+
+/* Prazer — dourado sobre fundo escuro */
+
+:root[data-clima="prazer"] {
+    --bg: #0d0b08;
+    --surface: #19150f;
+    --card: #252016;
+
+    --accent: #d6b66e;
+    --accent2: #a9823e;
+
+    --text: #faf4e7;
+    --muted: #b8aa90;
+
+    --line: rgba(214, 182, 110, 0.14);
+    --glow: rgba(214, 182, 110, 0.20);
+}
+
+#painel-climas .clima-prazer {
+    --clima-luz: #d6b66e;
+    --clima-fundo: #392b13;
+}
+/* =========================================
+   PLAY — ONDAS DE LUZ DURANTE A REPRODUÇÃO
+   ========================================= */
+
+.player .controls .play {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+}
+
+.player .controls .play::before,
+.player .controls .play::after {
+    content: "";
+
+    position: absolute;
+    inset: -6px;
+
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+
+    pointer-events: none;
+    opacity: 0;
+}
+
+.player .controls .play[aria-label="Pausar"] {
+    box-shadow:
+        0 0 18px var(--glow),
+        0 0 38px var(--glow);
+}
+
+.player .controls .play[aria-label="Pausar"]::before,
+.player .controls .play[aria-label="Pausar"]::after {
+    animation: sound-love-ondas 3.2s ease-out infinite;
+}
+
+.player .controls .play[aria-label="Pausar"]::after {
+    animation-delay: 1.6s;
+}
+
+@keyframes sound-love-ondas {
+    0% {
+        transform: scale(0.94);
+        opacity: 0;
+    }
+
+    18% {
+        opacity: 0.45;
+    }
+
+    100% {
+        transform: scale(1.55);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player .controls .play[aria-label="Pausar"]::before,
+    .player .controls .play[aria-label="Pausar"]::after {
+        animation: none;
+    }
+}
+
+/* =========================================
+   CAPA — MOVIMENTO SUAVE
+   ========================================= */
+
+.player.player-imersivo {
+    overflow: hidden;
+}
+
+.player.player-imersivo img[data-capa] {
+    transform-origin: center 40%;
+
+    animation:
+        sound-love-capa 18s ease-in-out infinite alternate;
+
+    animation-play-state: paused;
+}
+
+.player.player-imersivo:has(
+    .controls .play[aria-label="Pausar"]
+) img[data-capa] {
+    animation-play-state: running;
+}
+
+@keyframes sound-love-capa {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.045);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player.player-imersivo img[data-capa] {
+        animation: none;
+        transform: none;
+    }
+}
+/* =========================================
+   CAPA — PARTÍCULAS DE LUZ
+   ========================================= */
+
+.player-capa-ampla {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.player-particulas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    overflow: hidden;
+    pointer-events: none;
+
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.player-imersivo:has(
+    .controls .play[aria-label="Pausar"]
+) .player-particulas {
+    opacity: 1;
+}
+
+.player-particulas span {
+    position: absolute;
+
+    left: var(--x);
+    bottom: 8%;
+
+    width: var(--tamanho);
+    height: var(--tamanho);
+
+    border-radius: 50%;
+    background: var(--accent);
+
+    box-shadow:
+        0 0 8px var(--accent),
+        0 0 18px var(--glow);
+
+    filter: blur(0.6px);
+    opacity: 0;
+
+    animation:
+        sound-love-particula
+        var(--tempo)
+        linear
+        var(--atraso)
+        infinite;
+
+    animation-play-state: paused;
+}
+
+.player-imersivo:has(
+    .controls .play[aria-label="Pausar"]
+) .player-particulas span {
+    animation-play-state: running;
+}
+
+@keyframes sound-love-particula {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 0.95;
+    }
+
+    65% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(18px, -260px) scale(1.8);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-particulas {
+        display: none;
+    }
 }
