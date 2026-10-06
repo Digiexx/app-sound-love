@@ -26,8 +26,13 @@ window.SoundLove = (() => {
     let dados = {
         preferidas: {},
         classificacoes: {},
-        tema: "synthwave",
-        momentos: []
+        tema: "carinho",
+        momentos: [],
+
+        efeitos: {
+            animarCapa: true,
+            particulas: true
+        }
     };
 
     let tempoMensagem;
@@ -119,6 +124,18 @@ window.SoundLove = (() => {
                 Array.isArray(salvos.momentos)
                     ? salvos.momentos
                     : [];
+
+            dados.efeitos = {
+                animarCapa:
+                    typeof salvos.efeitos?.animarCapa === "boolean"
+                        ? salvos.efeitos.animarCapa
+                        : true,
+
+                particulas:
+                    typeof salvos.efeitos?.particulas === "boolean"
+                        ? salvos.efeitos.particulas
+                        : true
+            };
 
         } catch {
 
@@ -315,7 +332,323 @@ const paginasMenu = [
     }
 
 
-    function navegar(destino) {
+    function abrirPainelAjustes() {
+
+        let painel =
+            document.getElementById("painel-ajustes");
+
+        if (!painel) {
+
+            painel = document.createElement("dialog");
+
+            painel.id = "painel-ajustes";
+            painel.className = "painel-sound";
+
+            painel.setAttribute(
+                "aria-labelledby",
+                "titulo-ajustes"
+            );
+
+            document.body.appendChild(painel);
+
+        }
+
+        const nomesClimas = {
+            desejo: "Desejo",
+            paixao: "Paixão",
+            carinho: "Carinho",
+            prazer: "Prazer"
+        };
+
+        const clima =
+            document.documentElement.dataset.clima ||
+            "carinho";
+
+        painel.innerHTML = `
+            <form method="dialog">
+
+                <button
+                    type="submit"
+                    class="painel-sound-fechar"
+                    aria-label="Fechar ajustes"
+                >
+                    ×
+                </button>
+
+            </form>
+
+            <div class="ajustes-cabecalho">
+
+                <span
+                    class="ajustes-cabecalho-icone"
+                    aria-hidden="true"
+                >
+                    ♡
+                </span>
+
+                <div class="ajustes-cabecalho-texto">
+
+                    <span class="ajustes-assinatura">
+                        SUA EXPERIÊNCIA
+                    </span>
+
+                    <h2 id="titulo-ajustes">
+                        Seu Sound Love
+                    </h2>
+
+                    <p class="painel-sound-subtitulo">
+                        Cada detalhe no seu ritmo.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="ajustes-clima"
+                id="ajustes-escolher-clima"
+            >
+                <span>
+                    <strong>Escolha seu tema</strong>
+
+                    <small>
+                        ${
+                            textoSeguro(
+                                nomesClimas[clima] || "Carinho"
+                            )
+                        }
+                    </small>
+                </span>
+
+                <span aria-hidden="true">›</span>
+            </button>
+
+            <div class="ajustes-efeitos">
+
+                <h3>Efeitos visuais</h3>
+
+                <label class="ajustes-efeito">
+
+                    <span>
+                        <strong>Animar a capa</strong>
+                        <small>Movimento suave na imagem.</small>
+                    </span>
+
+                    <span class="ajustes-interruptor">
+
+                        <input
+                            type="checkbox"
+                            id="ajuste-animar-capa"
+                            role="switch"
+                            ${dados.efeitos.animarCapa ? "checked" : ""}
+                        >
+
+                        <span
+                            class="ajustes-interruptor-status"
+                            aria-hidden="true"
+                        ></span>
+
+                    </span>
+
+                </label>
+
+                <label class="ajustes-efeito">
+
+                    <span>
+                        <strong>Mostrar partículas</strong>
+                        <small>Pontos de luz sobre a capa.</small>
+                    </span>
+
+                    <input
+                        type="checkbox"
+                        id="ajuste-particulas"
+                        role="switch"
+                        ${dados.efeitos.particulas ? "checked" : ""}
+                    >
+
+                </label>
+
+            </div>
+
+            <div class="ajustes-colecao">
+
+                <span
+                    class="ajustes-colecao-icone"
+                    aria-hidden="true"
+                >
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M9 18V5l12-2v13"/>
+                        <path d="M9 9l12-2"/>
+                        <ellipse cx="6" cy="18" rx="3" ry="3"/>
+                        <ellipse cx="18" cy="16" rx="3" ry="3"/>
+                    </svg>
+                </span>
+
+                <div class="ajustes-colecao-texto">
+
+                    <strong>Sua coleção</strong>
+
+                    <small>
+                        Músicas para seus momentos.
+                    </small>
+
+                </div>
+
+                <span class="ajustes-colecao-total">
+                    ${window.SOUND_MUSICAS.length}
+                </span>
+
+            </div>
+
+            <p class="painel-sound-rodape">
+                Sua escolha de tema fica salva neste navegador.
+            </p>
+        `;
+
+        painel
+            .querySelector("#ajustes-escolher-clima")
+            .addEventListener("click", () => {
+
+                painel.close();
+
+                executarAcao("open-themes");
+
+            });
+
+        const controlesEfeitos = [
+            {
+                seletor: "#ajuste-animar-capa",
+                preferencia: "animarCapa",
+                atributo: "animarCapa"
+            },
+            {
+                seletor: "#ajuste-particulas",
+                preferencia: "particulas",
+                atributo: "particulas"
+            }
+        ];
+
+        controlesEfeitos.forEach((controle) => {
+
+            const campo =
+                painel.querySelector(controle.seletor);
+
+            document.documentElement.dataset[
+                controle.atributo
+            ] = String(
+                dados.efeitos[controle.preferencia]
+            );
+
+            campo.addEventListener("change", () => {
+
+                dados.efeitos[
+                    controle.preferencia
+                ] = campo.checked;
+
+                document.documentElement.dataset[
+                    controle.atributo
+                ] = String(campo.checked);
+
+                salvarDados();
+
+            });
+
+        });
+
+        if (!painel.open) {
+
+            painel.showModal();
+
+        }
+
+    }
+
+    function abrirPainelMomentos() {
+
+    let painel =
+        document.getElementById("painel-momentos");
+
+    if (!painel) {
+
+        painel = document.createElement("dialog");
+
+        painel.id = "painel-momentos";
+        painel.className = "painel-sound";
+
+        painel.setAttribute(
+            "aria-labelledby",
+            "titulo-momentos"
+        );
+
+        document.body.appendChild(painel);
+
+    }
+
+    painel.innerHTML = `
+        <form method="dialog">
+
+            <button
+                type="submit"
+                class="painel-sound-fechar"
+                aria-label="Fechar momentos"
+            >
+                ×
+            </button>
+
+        </form>
+
+        <div class="momentos-cabecalho">
+
+            <span
+                class="momentos-cabecalho-icone"
+                aria-hidden="true"
+            >
+                ♡
+            </span>
+
+            <h2 id="titulo-momentos">
+                Meus momentos
+            </h2>
+
+            <p class="painel-sound-subtitulo">
+                Uma sequência de músicas para cada ocasião.
+            </p>
+
+        </div>
+
+        <div class="momentos-vazio">
+
+            <strong>
+                Seu próximo momento começa aqui.
+            </strong>
+
+            <p>
+                Em breve, você poderá reunir músicas,
+                escolher a ordem e salvar suas sequências.
+            </p>
+
+        </div>
+    `;
+
+    if (!painel.open) {
+
+        painel.showModal();
+
+    }
+
+}
+
+function navegar(destino) {
 
         if (destino === "preferidas") {
 
@@ -1741,6 +2074,135 @@ document.addEventListener("input", evento => {
 
     }
 
+    function abrirClassificacao(id) {
+
+        const musica = window.SOUND_MUSICAS.find(
+            (item) => item.id === id
+        );
+
+        if (!musica) {
+            return;
+        }
+
+        const categorias = window.SOUND_CATEGORIAS;
+
+        const selecionadas =
+            Array.isArray(dados.classificacoes[id])
+                ? dados.classificacoes[id]
+                : musica.categorias || [];
+
+        document
+            .getElementById("painel-classificacao")
+            ?.remove();
+
+        const painel = document.createElement("dialog");
+
+        painel.id = "painel-classificacao";
+
+        painel.setAttribute(
+            "aria-labelledby",
+            "titulo-classificacao"
+        );
+
+        painel.innerHTML = `
+            <form id="form-classificacao">
+
+                <button
+                    type="button"
+                    class="classificacao-fechar"
+                    aria-label="Fechar classificação"
+                >
+                    ×
+                </button>
+
+                <h2 id="titulo-classificacao">
+                    Escolha os momentos
+                </h2>
+
+                <p class="classificacao-musica">
+                    ${textoSeguro(musica.titulo)}
+                </p>
+
+                <p class="classificacao-dica">
+                    Você pode marcar mais de uma categoria.
+                </p>
+
+                <div class="classificacao-opcoes">
+
+                    ${categorias.map((categoria) => `
+                        <label class="classificacao-opcao">
+
+                            <input
+                                type="checkbox"
+                                name="categoria"
+                                value="${textoSeguro(categoria.id)}"
+                                ${
+                                    selecionadas.includes(categoria.id)
+                                        ? "checked"
+                                        : ""
+                                }
+                            >
+
+                            <span class="classificacao-icone">
+                                ${textoSeguro(categoria.icone || "◇")}
+                            </span>
+
+                            <span>
+                                ${textoSeguro(categoria.nome)}
+                            </span>
+
+                        </label>
+                    `).join("")}
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="classificacao-salvar"
+                >
+                    Salvar categorias
+                </button>
+
+            </form>
+        `;
+
+        painel
+            .querySelector(".classificacao-fechar")
+            .addEventListener("click", () => {
+
+                painel.close();
+
+            });
+
+        painel
+            .querySelector("form")
+            .addEventListener("submit", (evento) => {
+
+                evento.preventDefault();
+
+                dados.classificacoes[id] = Array.from(
+                    painel.querySelectorAll(
+                        'input[name="categoria"]:checked'
+                    ),
+                    (campo) => campo.value
+                );
+
+                salvarDados();
+
+                painel.close();
+
+                renderizar();
+
+                avisar("Categorias salvas.");
+
+            });
+
+        document.body.appendChild(painel);
+
+        painel.showModal();
+
+    }
+
     function executarAcao(acao, id) {
 
         switch (acao) {
@@ -1748,6 +2210,11 @@ document.addEventListener("input", evento => {
             case "favorite":
 
                 alternarPreferida(id);
+                break;
+
+            case "classify":
+
+                abrirClassificacao(id);
                 break;
 
             case "browse":
@@ -1988,8 +2455,47 @@ case "retry-track":
 
     window.addEventListener("hashchange", () => {
 
-        estado.pagina =
+        const destino =
             location.hash.substring(1) || "inicio";
+
+        if (destino === "momentos") {
+
+    const paginaAnterior =
+        ["ajustes", "momentos"].includes(estado.pagina)
+            ? "inicio"
+            : estado.pagina;
+
+    history.replaceState(
+        null,
+        "",
+        "#" + paginaAnterior
+    );
+
+    abrirPainelMomentos();
+    return;
+
+}
+
+if (destino === "ajustes") {
+
+            const paginaAnterior =
+                estado.pagina === "ajustes"
+                    ? "inicio"
+                    : estado.pagina;
+
+            history.replaceState(
+                null,
+                "",
+                "#" + paginaAnterior
+            );
+
+            abrirPainelAjustes();
+
+            return;
+
+        }
+
+        estado.pagina = destino;
 
         if (estado.pagina === "preferidas") {
 
@@ -2009,7 +2515,13 @@ case "retry-track":
        INICIALIZAÇÃO
        ===================================== */
 
-    carregarDados();
+      carregarDados();
+
+    document.documentElement.dataset.animarCapa =
+        String(dados.efeitos.animarCapa);
+
+    document.documentElement.dataset.particulas =
+        String(dados.efeitos.particulas);
 
     document.documentElement.dataset.clima =
         ["desejo", "paixao", "carinho", "prazer"].includes(dados.tema)
