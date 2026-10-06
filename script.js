@@ -773,7 +773,7 @@ const paginasMenu = [
 
         atualizarLista();
 
-    } else if (estado.pagina === "player") {
+    } else if ((estado.pagina === "player" || estado.pagina === "inicio")) {
 
         pagina.innerHTML = paginaPlayer();
 
@@ -895,7 +895,7 @@ function atualizarMiniPlayer() {
 
     const musica = musicaAtual();
 
-    if (!musica || estado.pagina === "player") {
+    if (!musica || estado.pagina === "player" || estado.pagina === "inicio") {
 
         miniPlayer.style.display = "none";
         return;
@@ -966,192 +966,253 @@ function paginaPlayer() {
 
     }
 
+    const preferida = ehPreferida(musica);
+
+    const duracaoValida =
+        Number.isFinite(audio.duration) &&
+        audio.duration > 0;
+
+    const progresso = duracaoValida
+        ? Math.min(
+            100,
+            Math.max(
+                0,
+                (audio.currentTime / audio.duration) * 100
+            )
+        )
+        : 0;
+
     return `
-        <button
-            class="back"
-            data-action="back-library"
-        >
-            ‹ Voltar à coleção
-        </button>
+        <div class="player player-imersivo">
 
-        <div class="player">
+            <div class="player-capa-ampla">
 
-            ${capaPlayer(musica, "album")}
-
-            <h1>
-                ${textoSeguro(musica.titulo)}
-            </h1>
-
-            <p>
-                ${textoSeguro(
-                    musica.artista || "Sua coleção"
-                )}
-            </p>
-
-            <input
-                class="seek"
-                id="player-seek"
-                type="range"
-                min="0"
-                max="${
-                    Number.isFinite(audio.duration)
-                        ? audio.duration
-                        : 0
-                }"
-                value="${audio.currentTime || 0}"
-                step="0.1"
-                aria-label="Posição da música"
-                ${
-                    Number.isFinite(audio.duration)
-                        ? ""
-                        : "disabled"
-                }
-            >
-
-            <div class="times">
-
-                <span id="player-elapsed">
-                    ${formatarTempo(audio.currentTime)}
-                </span>
-
-                <span id="player-duration">
-                    ${formatarTempo(audio.duration)}
-                </span>
+                ${capaPlayer(musica, "album")}
 
             </div>
 
-            <div class="controls">
+            <div class="player-conteudo">
 
-                <button
-                    data-action="repeat-track"
-                    class="${
-                        reproducao.repetir
-                            ? "active"
-                            : ""
-                    }"
-                    aria-label="Repetir música"
-                    aria-pressed="${reproducao.repetir}"
-                >
-                    ↻
-                </button>
+                <div class="player-cabecalho">
 
-                <button
-                    data-action="previous-track"
-                    aria-label="Música anterior"
-                >
-                    ◂◂
-                </button>
+                    <div class="player-identidade">
 
-                <button
-                    class="play"
-                    data-action="toggle-play"
-                    aria-label="${
-                        audio.paused
-                            ? "Tocar"
-                            : "Pausar"
-                    }"
-                >
-                    ${audio.paused ? "▶" : "❚❚"}
-                </button>
+                        <h1>
+                            ${textoSeguro(musica.titulo)}
+                        </h1>
 
-                <button
-                    data-action="next-track"
-                    aria-label="Próxima música"
-                >
-                    ▸▸
-                </button>
+                        <p>
+                            ${textoSeguro(
+                                musica.artista || "Sua coleção"
+                            )}
+                        </p>
 
-                <button
-                    data-action="shuffle-tracks"
-                    class="${
-                        reproducao.aleatorio
-                            ? "active"
-                            : ""
-                    }"
-                    aria-label="Reprodução aleatória"
-                    aria-pressed="${reproducao.aleatorio}"
-                >
-                    ⤨
-                </button>
+                    </div>
 
-            </div>
+                    <div class="player-acoes">
 
-            <label>
-                Volume
+                        <button
+                            class="player-acao"
+                            data-action="classify"
+                            data-id="${textoSeguro(musica.id)}"
+                            aria-label="Classificar música"
+                            title="Classificar música"
+                        >
+                            <svg
+                                width="21"
+                                height="21"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20 13 13 20a2 2 0 0 1-2.8 0L3 12.8V3h9.8l7.2 7.2a2 2 0 0 1 0 2.8Z"/>
+                                <circle cx="7.5" cy="7.5" r="1"/>
+                            </svg>
+                        </button>
+
+                        <button
+                            class="player-acao player-favorita ${
+                                preferida ? "on" : ""
+                            }"
+                            data-action="favorite"
+                            data-id="${textoSeguro(musica.id)}"
+                            aria-label="${
+                                preferida
+                                    ? "Remover das preferidas"
+                                    : "Adicionar às preferidas"
+                            }"
+                            title="${
+                                preferida
+                                    ? "Remover das preferidas"
+                                    : "Adicionar às preferidas"
+                            }"
+                            aria-pressed="${preferida}"
+                        >
+                            <svg
+                                width="23"
+                                height="23"
+                                viewBox="0 0 24 24"
+                                fill="${
+                                    preferida
+                                        ? "currentColor"
+                                        : "none"
+                                }"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>
+                            </svg>
+                        </button>
+
+                    </div>
+
+                </div>
 
                 <input
-                    class="volume"
-                    id="player-volume"
+                    class="seek"
+                    id="player-seek"
                     type="range"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value="${audio.volume}"
-                    aria-label="Volume"
+                    max="${duracaoValida ? audio.duration : 0}"
+                    value="${audio.currentTime || 0}"
+                    step="0.1"
+                    style="--progresso:${progresso}%"
+                    aria-label="Posição da música"
+                    ${duracaoValida ? "" : "disabled"}
                 >
-            </label>
 
-            <div
-                class="control-dock"
-                style="margin-top:25px"
-            >
+                <div class="times">
 
-                <button
-                    class="heart ${
-                        ehPreferida(musica)
-                            ? "on"
-                            : ""
-                    }"
-                    data-action="favorite"
-                    data-id="${textoSeguro(musica.id)}"
-                    aria-pressed="${ehPreferida(musica)}"
-                >
-                    ${ehPreferida(musica) ? "♥" : "♡"}
+                    <span id="player-elapsed">
+                        ${formatarTempo(audio.currentTime)}
+                    </span>
 
-                    <small>Preferida</small>
-                </button>
+                    <span id="player-duration">
+                        ${formatarTempo(audio.duration)}
+                    </span>
 
-                <button
-                    data-action="classify"
-                    data-id="${textoSeguro(musica.id)}"
-                >
-                    ◇
+                </div>
 
-                    <small>Classificar</small>
-                </button>
+                <div class="controls">
+
+                    <button
+                        data-action="repeat-track"
+                        class="${
+                            reproducao.repetir ? "active" : ""
+                        }"
+                        aria-label="Repetir música"
+                        aria-pressed="${reproducao.repetir}"
+                    >
+                        ↻
+                    </button>
+
+                    <button
+                        data-action="previous-track"
+                        aria-label="Música anterior"
+                    >
+                        ◂◂
+                    </button>
+
+                    <button
+                        class="play"
+                        data-action="toggle-play"
+                        aria-label="${
+                            audio.paused ? "Tocar" : "Pausar"
+                        }"
+                    >
+                        ${audio.paused ? "▶" : "❚❚"}
+                    </button>
+
+                    <button
+                        data-action="next-track"
+                        aria-label="Próxima música"
+                    >
+                        ▸▸
+                    </button>
+
+                    <button
+                        data-action="shuffle-tracks"
+                        class="${
+                            reproducao.aleatorio ? "active" : ""
+                        }"
+                        aria-label="Reprodução aleatória"
+                        aria-pressed="${reproducao.aleatorio}"
+                    >
+                        ⤨
+                    </button>
+
+                </div>
+
+                <label class="player-volume-linha">
+
+                    <svg
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+                        <path d="M15 8a6 6 0 0 1 0 8"/>
+                        <path d="M18 5a10 10 0 0 1 0 14"/>
+                    </svg>
+
+                    <input
+                        class="volume"
+                        id="player-volume"
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value="${audio.volume}"
+                        style="--volume:${audio.volume * 100}%"
+                        aria-label="Volume"
+                    >
+
+                </label>
+
+                ${
+                    reproducao.erro
+                        ? `
+                            <div class="error">
+
+                                <strong>
+                                    Não foi possível tocar
+                                </strong>
+
+                                <p>
+                                    Confira o nome do MP3
+                                    e seu caminho em musicas.js.
+                                </p>
+
+                                <button
+                                    data-action="retry-track"
+                                >
+                                    Tentar novamente
+                                </button>
+
+                            </div>
+                        `
+                        : ""
+                }
 
             </div>
-
-            ${
-                reproducao.erro
-                    ? `
-                        <div class="error">
-
-                            <strong>
-                                Não foi possível tocar
-                            </strong>
-
-                            <p>
-                                Confira o nome do MP3
-                                e seu caminho em musicas.js.
-                            </p>
-
-                            <button
-                                data-action="retry-track"
-                            >
-                                Tentar novamente
-                            </button>
-
-                        </div>
-                    `
-                    : ""
-            }
 
         </div>
     `;
 
 }
-
 
 async function iniciarAudio() {
 
@@ -1325,13 +1386,81 @@ function musicaAnterior() {
 }
 
 
-// Atualiza o preenchimento imediatamente ao ajustar o volume.
+// Prepara a barra assim que a duração da música estiver disponível.
+function prepararBarraDeProgresso() {
+    const barra = document.getElementById("player-seek");
+
+    if (!barra) {
+        return;
+    }
+
+    const duracaoValida =
+        Number.isFinite(audio.duration) &&
+        audio.duration > 0;
+
+    barra.min = 0;
+    barra.max = duracaoValida ? audio.duration : 0;
+    barra.disabled = !duracaoValida;
+    barra.value = duracaoValida ? audio.currentTime : 0;
+
+    const percentual = duracaoValida
+        ? (audio.currentTime / audio.duration) * 100
+        : 0;
+
+    barra.style.setProperty(
+        "--progresso",
+        `${percentual}%`
+    );
+}
+
+audio.addEventListener(
+    "loadedmetadata",
+    prepararBarraDeProgresso
+);
+
+audio.addEventListener(
+    "durationchange",
+    prepararBarraDeProgresso
+);
+
+// Atualiza as barras ao arrastar os marcadores.
 document.addEventListener("input", (evento) => {
-    if (evento.target.id === "player-volume") {
-        evento.target.style.setProperty(
+    const controle = evento.target;
+
+    if (controle.id === "player-volume") {
+        const volume = Number(controle.value);
+
+        audio.volume = volume;
+
+        controle.style.setProperty(
             "--volume",
-            `${Number(evento.target.value) * 100}%`
+            `${volume * 100}%`
         );
+    }
+
+    if (
+        controle.id === "player-seek" &&
+        Number.isFinite(audio.duration) &&
+        audio.duration > 0
+    ) {
+        const novoTempo = Math.min(
+            audio.duration,
+            Math.max(0, Number(controle.value))
+        );
+
+        audio.currentTime = novoTempo;
+
+        controle.style.setProperty(
+            "--progresso",
+            `${(novoTempo / audio.duration) * 100}%`
+        );
+
+        const decorrido =
+            document.getElementById("player-elapsed");
+
+        if (decorrido) {
+            decorrido.textContent = formatarTempo(novoTempo);
+        }
     }
 });
 
@@ -1407,7 +1536,7 @@ audio.addEventListener("loadedmetadata", () => {
 
 audio.addEventListener("play", () => {
 
-    if (estado.pagina === "player") {
+    if (estado.pagina === "player" || estado.pagina === "inicio") {
 
         renderizar();
 
@@ -1422,7 +1551,7 @@ audio.addEventListener("play", () => {
 
 audio.addEventListener("pause", () => {
 
-    if (estado.pagina === "player") {
+    if (estado.pagina === "player" || estado.pagina === "inicio") {
 
         renderizar();
 

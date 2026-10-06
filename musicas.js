@@ -14,7 +14,7 @@ window.SOUND_MUSICAS = [
         arquivo: "musicas/noite-a-dois.mp3",
 
         // Deixe vazio para usar a capa provisória.
-        capa: "capas/noite-a-dois.png",
+        capa: "capas/noite-a-dois.webp",
 
         categorias: ["massagem", "sussuro"],
 
