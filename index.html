@@ -1,120 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Love - Player</title>
-    <link rel="icon" type="image/png" href="imagens/icon.png">
-    <link rel="manifest" href="manifest.json">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#17082d">
+
+    <meta
+        name="description"
+        content="Sound Love: suas músicas, suas preferidas e seus momentos."
+    >
+
+    <title>Sound Love</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <!-- TELA DE BLOQUEIO POR SENHA -->
-    <div id="lock-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b0f19; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
-        <div style="background: #1a1f2c; padding: 30px; border-radius: 20px; border: 1px solid #ff2a75; max-width: 350px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-            <h2 style="color: #fff; font-size: 1.2rem; margin-bottom: 10px;">Área Restrita 🔒</h2>
-            <p style="color: #a0aec0; font-size: 0.85rem; margin-bottom: 20px;">Digite a senha para liberar o app:</p>
-            <input type="password" id="app-password" placeholder="Sua senha" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #121622; color: #fff; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none;">
-            <button id="unlock-btn" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #ff2a75; color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer;">Entrar</button>
-            <p id="error-msg" style="color: #ff2a75; font-size: 0.75rem; margin-top: 10px; display: none;">Senha incorreta!</p>
-        </div>
-    </div>
+    <div class="shell">
 
-    <!-- CONTAINER PRINCIPAL (TELA CHEIA) -->
-    <div class="app-container">
-        <!-- Topo -->
-        <header class="app-header">
-            <i class="fa-solid fa-chevron-left"></i>
-            <span>Sound Love Playing</span>
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-        </header>
+        <!-- Menu para computadores -->
+        <aside id="sidebar">
 
-        <!-- Categorias / Abas -->
-        <div class="categories-nav">
-            <button class="cat-btn active" data-category="favoritas">Favoritas</button>
-            <button class="cat-btn" data-category="massagem">Massagem</button>
-            <button class="cat-btn" data-category="prazer">Gozar</button>
-            <button class="cat-btn" data-category="todas">Todas</button>
-        </div>
+            <a class="brand" href="#inicio">
+                ♡ SOUND <b>LOVE</b>
+            </a>
 
-        <!-- Capa do Álbum Estilo Vinil/Neon -->
-        <div class="vinyl-section">
-            <div class="vinyl-disc">
-                <img id="album-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60" alt="Capa">
-                <div class="vinyl-center"></div>
+            <p class="eyebrow">
+                SUA COLEÇÃO. SEU MOMENTO.
+            </p>
+
+            <nav
+                id="desktop-nav"
+                aria-label="Navegação principal"
+            ></nav>
+
+            <div class="side-art">
+                <span>
+                    Entre no seu<br>
+                    próprio ritmo.
+                </span>
             </div>
-        </div>
 
-        <!-- Info da Música -->
-        <div class="track-info">
-            <h2 id="current-title">Sensual Night</h2>
-            <p id="current-artist">Sound Love Beats</p>
-        </div>
+            <small>
+                Feito para os seus momentos.
+            </small>
 
-        <!-- Lista de Músicas da Categoria -->
-        <div class="playlist-container" id="song-list">
-            <!-- Preenchido via JS -->
-        </div>
+        </aside>
 
-        <!-- Controles e Player -->
-        <div class="player-footer">
-            <div class="progress-area">
-                <span id="current-time">0:00</span>
-                <div class="progress-bar" id="progress-bar">
-                    <div class="progress" id="progress"></div>
+        <!-- Conteúdo das páginas -->
+        <main>
+
+            <header>
+
+                <a class="brand" href="#inicio">
+                    SOUND <b>LOVE</b>
+                </a>
+
+                <div class="header-actions">
+
+                    <button
+                        type="button"
+                        data-action="search"
+                        aria-label="Buscar músicas"
+                    >
+                        ⌕
+                    </button>
+
+                    <button
+                        type="button"
+                        data-action="settings"
+                        aria-label="Abrir ajustes"
+                    >
+                        ⚙
+                    </button>
+
                 </div>
-                <span id="duration">0:00</span>
-            </div>
 
-            <div class="player-controls">
-                <button class="sub-control"><i class="fa-solid fa-shuffle"></i></button>
-                <button id="prev-btn" class="control-btn"><i class="fa-solid fa-backward-step"></i></button>
-                <button id="play-pause-btn" class="control-btn main-play"><i class="fa-solid fa-play"></i></button>
-                <button id="next-btn" class="control-btn"><i class="fa-solid fa-forward-step"></i></button>
-                <button class="sub-control"><i class="fa-solid fa-repeat"></i></button>
-            </div>
-        </div>
-        
-        <audio id="audio-element"></audio>
+            </header>
+
+            <div id="page"></div>
+
+        </main>
+
     </div>
 
-    <!-- Popup / Banner de Instalação Customizado -->
-    <div id="install-banner" class="install-banner" style="display: none;">
-        <div class="install-content">
-            <img src="imagens/icon.png" alt="Ícone" class="install-icon">
-            <div class="install-text">
-                <h3>Instalar Sound Love</h3>
-                <p>Instale Agora para Aproveitar Cada Segundo Desse Prazer!</p>
-            </div>
-            <button id="install-btn">Instalar</button>
-            <button id="close-banner">&times;</button>
-        </div>
-    </div>
+    <!-- Player compacto -->
+    <div id="mini"></div>
 
-    <!-- SCRIPTS DO APP E DA SENHA -->
+    <!-- Navegação para celulares -->
+    <nav
+        id="bottom-nav"
+        aria-label="Navegação para celular"
+    ></nav>
+
+    <!-- Classificação, fila, temas e outros painéis -->
+    <dialog id="modal" aria-label="Painel do Sound Love">
+
+        <div id="modal-content"></div>
+
+    </dialog>
+
+    <!-- Mensagens de confirmação -->
+    <div
+        id="toast"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+    <!-- Reprodução dos arquivos de áudio -->
+    <audio id="audio" preload="metadata"></audio>
+
+    <!-- Importação do backup de preferências -->
+    <input
+        type="file"
+        id="import"
+        accept=".json,application/json"
+        aria-label="Importar backup de preferências"
+        hidden
+    >
+
+    <!-- A ordem destes arquivos é importante -->
+    <script src="categorias.js"></script>
+    <script src="musicas.js"></script>
     <script src="script.js"></script>
-    <script>
-        // Lógica de verificação de senha
-        if (localStorage.getItem("app_liberado") === "true") {
-            document.getElementById('lock-screen').style.display = 'none';
-        }
 
-        document.getElementById('unlock-btn').addEventListener('click', () => {
-            const pass = document.getElementById('app-password').value;
-            const senhaCorreta = "Dayenne"; // Altere a senha aqui se preferir
-            
-            if (pass === senhaCorreta) {
-                localStorage.setItem("app_liberado", "true");
-                document.getElementById('lock-screen').style.display = 'none';
-            } else {
-                const error = document.getElementById('error-msg');
-                error.style.display = 'block';
-            }
-        });
-    </script>
 </body>
+
 </html>

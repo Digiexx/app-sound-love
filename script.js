@@ -1,205 +1,1752 @@
-let musicDatabase = [
-    { id: 1, title: "Sensual Night", artist: "Sound Love Beats", category: "favoritas", cover: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-    { id: 7, title: "Massagem01", artist: "Love Prazer x", category: "favoritas", cover: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=500&auto=format&fit=crop&q=60", src: "musicas/massagem01.mp3" },
-    { id: 2, title: "Veludo & Vinho", artist: "Romantic Vibes", category: "favoritas", cover: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-    { id: 3, title: "Toque Suave", artist: "Relaxing Touch", category: "massagem", cover: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-    { id: 4, title: "Aromas e Mãos", artist: "Spa Sessions", category: "massagem", cover: "https://images.unsplash.com/photo-1519823551738-c16a850ebf16?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-    { id: 5, title: "Paixão Intensa", artist: "Deep Desire", category: "prazer", cover: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-    { id: 6, title: "Êxtase Total", artist: "Night Fever", category: "prazer", cover: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop&q=60", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
+/* =========================================
+   SOUND LOVE — BASE DO APLICATIVO
+   ========================================= */
+
+window.SoundLove = (() => {
+
+    "use strict";
+
+    const categorias = window.SOUND_CATEGORIAS || [];
+    const musicas = window.SOUND_MUSICAS || [];
+
+    const pagina = document.getElementById("page");
+    const menuDesktop = document.getElementById("desktop-nav");
+    const menuCelular = document.getElementById("bottom-nav");
+    const mensagem = document.getElementById("toast");
+
+    const chaveDados = "sound-love-dados-v1";
+
+    const estado = {
+        pagina: "inicio",
+        busca: "",
+        categoria: "todas",
+        ordem: "az"
+    };
+
+    let dados = {
+        preferidas: {},
+        classificacoes: {},
+        tema: "synthwave",
+        momentos: []
+    };
+
+    let tempoMensagem;
+
+    /* Imagem provisória feita em código.
+       Será usada quando a música não tiver capa. */
+
+    const desenhoCapa = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="500" height="500"
+             viewBox="0 0 500 500">
+
+            <defs>
+                <linearGradient id="fundo"
+                                x2="0" y2="1">
+                    <stop stop-color="#48106c"/>
+                    <stop offset="1" stop-color="#10071f"/>
+                </linearGradient>
+
+                <linearGradient id="sol"
+                                x2="0" y2="1">
+                    <stop stop-color="#ffb9ea"/>
+                    <stop offset="1" stop-color="#f800cd"/>
+                </linearGradient>
+            </defs>
+
+            <rect width="500" height="500"
+                  fill="url(#fundo)"/>
+
+            <circle cx="250" cy="210" r="100"
+                    fill="url(#sol)"/>
+
+            <path d="M0 340 L100 230 L190 330
+                     L300 245 L410 325 L500 260
+                     V500 H0 Z"
+                  fill="#27103e"/>
+
+            <path d="M0 390 L140 320 L240 385
+                     L355 310 L500 390 V500 H0 Z"
+                  fill="#170b2b"/>
+
+            <path d="M210 500 L245 350
+                     L255 350 L290 500"
+                  fill="#f800cd"
+                  opacity=".45"/>
+
+        </svg>
+    `;
+
+    const capaPadrao =
+        "data:image/svg+xml;charset=utf-8," +
+        encodeURIComponent(desenhoCapa);
+
+
+    /* =====================================
+       DADOS SALVOS
+       ===================================== */
+
+    function carregarDados() {
+
+        try {
+
+            const salvos = JSON.parse(
+                localStorage.getItem(chaveDados)
+            );
+
+            if (!salvos || typeof salvos !== "object") {
+                return;
+            }
+
+            dados.preferidas =
+                salvos.preferidas &&
+                typeof salvos.preferidas === "object"
+                    ? salvos.preferidas
+                    : {};
+
+            dados.classificacoes =
+                salvos.classificacoes &&
+                typeof salvos.classificacoes === "object"
+                    ? salvos.classificacoes
+                    : {};
+
+            dados.tema =
+                typeof salvos.tema === "string"
+                    ? salvos.tema
+                    : "synthwave";
+
+            dados.momentos =
+                Array.isArray(salvos.momentos)
+                    ? salvos.momentos
+                    : [];
+
+        } catch {
+
+            // Mantém os dados iniciais se não houver
+            // um cadastro salvo válido.
+
+        }
+
+    }
+
+
+    function salvarDados() {
+
+        try {
+
+            localStorage.setItem(
+                chaveDados,
+                JSON.stringify(dados)
+            );
+
+        } catch {
+
+            avisar(
+                "Não foi possível salvar as preferências."
+            );
+
+        }
+
+    }
+
+
+    /* =====================================
+       FUNÇÕES AUXILIARES
+       ===================================== */
+
+    function textoSeguro(valor) {
+
+        return String(valor ?? "").replace(
+            /[&<>"']/g,
+            caractere => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[caractere])
+        );
+
+    }
+
+
+    function avisar(texto) {
+
+        mensagem.textContent = texto;
+        mensagem.style.display = "block";
+
+        clearTimeout(tempoMensagem);
+
+        tempoMensagem = setTimeout(() => {
+            mensagem.style.display = "none";
+        }, 3000);
+
+    }
+
+
+    function encontrarMusica(id) {
+
+        return musicas.find(musica => musica.id === id);
+
+    }
+
+
+    function ehPreferida(musica) {
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                dados.preferidas,
+                musica.id
+            )
+        ) {
+
+            return Boolean(
+                dados.preferidas[musica.id]
+            );
+
+        }
+
+        return Boolean(musica.preferida);
+
+    }
+
+
+    function categoriasDaMusica(musica) {
+
+        const classificacao =
+            dados.classificacoes[musica.id];
+
+        const lista = Array.isArray(classificacao)
+            ? classificacao
+            : musica.categorias;
+
+        return (Array.isArray(lista) ? lista : [])
+            .filter(id =>
+                categorias.some(
+                    categoria => categoria.id === id
+                )
+            );
+
+    }
+
+
+    function nomesDasCategorias(musica) {
+
+        return categoriasDaMusica(musica)
+            .map(id =>
+                categorias.find(
+                    categoria => categoria.id === id
+                ).nome
+            )
+            .join(" • ");
+
+    }
+
+
+    function imagemDaMusica(musica) {
+
+        return `
+            <img
+                src="${textoSeguro(
+                    musica.capa || capaPadrao
+                )}"
+                alt=""
+                data-capa
+            >
+        `;
+
+    }
+
+
+    function alternarPreferida(id) {
+
+        const musica = encontrarMusica(id);
+
+        if (!musica) {
+            return;
+        }
+
+        dados.preferidas[id] = !ehPreferida(musica);
+
+        salvarDados();
+        renderizar();
+
+    }
+
+
+    /* =====================================
+       NAVEGAÇÃO
+       ===================================== */
+
+const paginasMenu = [
+    { id: "inicio", nome: "Ouvir", icone: "♫" },
+    { id: "musicas", nome: "Coleção", icone: "☷" },
+    { id: "momentos", nome: "Momentos", icone: "♡" },
+    { id: "ajustes", nome: "Ajustes", icone: "⚙" }
 ];
 
-const songListContainer = document.getElementById('song-list');
-const audioElement = document.getElementById('audio-element');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const currentTitle = document.getElementById('current-title');
-const currentArtist = document.getElementById('current-artist');
-const albumCover = document.getElementById('album-cover');
-const progressBar = document.getElementById('progress-bar');
-const progress = document.getElementById('progress');
-const currentTimeEl = document.getElementById('current-time');
-const durationEl = document.getElementById('duration');
-const categoryButtons = document.querySelectorAll('.cat-btn');
+    function desenharMenus() {
 
-let currentView = 'favoritas';
-let currentSongIndex = 0;
-let isPlaying = false;
-let currentPlaylist = [];
+        const html = paginasMenu.map(item => {
 
-function initApp() {
-    loadCategory(currentView);
-    setupEvents();
-}
+            const ativa =
+                estado.pagina === item.id ||
+                (
+                    item.id === "musicas" &&
+                    estado.pagina === "preferidas"
+                );
 
-function loadCategory(cat) {
-    currentView = cat;
-    if (cat === 'todas') {
-        currentPlaylist = musicDatabase;
-    } else {
-        currentPlaylist = musicDatabase.filter(s => s.category === cat);
-    }
-    renderSongs();
-    if(currentPlaylist.length > 0) {
-        setSongInfo(currentPlaylist[0], false);
-    }
-}
-
-function renderSongs() {
-    songListContainer.innerHTML = '';
-    currentPlaylist.forEach((song, idx) => {
-        const card = document.createElement('div');
-        card.classList.add('song-card');
-        
-        let categorySelectorHtml = '';
-        if (currentView === 'todas') {
-            categorySelectorHtml = `
-                <select onchange="changeSongCategory(${song.id}, this.value)" onclick="event.stopPropagation()" class="cat-select">
-                    <option value="favoritas" ${song.category === 'favoritas' ? 'selected' : ''}>Favoritas</option>
-                    <option value="massagem" ${song.category === 'massagem' ? 'selected' : ''}>Massagem</option>
-                    <option value="prazer" ${song.category === 'prazer' ? 'selected' : ''}>Prazer Máximo</option>
-                </select>
+            return `
+                <a
+                    href="#${item.id}"
+                    class="${ativa ? "active" : ""}"
+                    ${ativa ? 'aria-current="page"' : ""}
+                >
+                    <span>${item.icone}</span>
+                    ${item.nome}
+                </a>
             `;
+
+        }).join("");
+
+        menuDesktop.innerHTML = html;
+        menuCelular.innerHTML = html;
+
+    }
+
+
+    function navegar(destino) {
+
+        if (destino === "preferidas") {
+
+            estado.categoria = "preferidas";
+            estado.busca = "";
+
         }
 
-        card.innerHTML = `
-            <div>
-                <h4>${song.title}</h4>
-                <span>${song.artist} ${currentView === 'todas' ? '• <i style="text-transform: capitalize; color: #ff2a75;">' + song.category + '</i>' : ''}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                ${categorySelectorHtml}
-                <i class="fa-solid fa-play" style="color: #ff2a75; font-size: 0.8rem;"></i>
+        if (location.hash === "#" + destino) {
+
+            estado.pagina = destino;
+            renderizar();
+
+        } else {
+
+            location.hash = destino;
+
+        }
+
+    }
+
+
+    /* =====================================
+       COMPONENTES DAS MÚSICAS
+       ===================================== */
+
+    function linhaMusica(musica) {
+
+        const preferida = ehPreferida(musica);
+
+        return `
+            <div class="row">
+
+                ${imagemDaMusica(musica)}
+
+                <button
+                    class="song-copy"
+                    data-action="play"
+                    data-id="${textoSeguro(musica.id)}"
+                    style="text-align:left"
+                >
+                    <strong>
+                        ${textoSeguro(musica.titulo)}
+                    </strong>
+
+                    <small>
+                        ${textoSeguro(
+                            nomesDasCategorias(musica) ||
+                            musica.artista ||
+                            "Sua coleção"
+                        )}
+                    </small>
+                </button>
+
+                <button
+                    class="heart ${preferida ? "on" : ""}"
+                    data-action="favorite"
+                    data-id="${textoSeguro(musica.id)}"
+                    aria-label="${
+                        preferida
+                            ? "Remover das preferidas"
+                            : "Adicionar às preferidas"
+                    }"
+                    aria-pressed="${preferida}"
+                >
+                    ${preferida ? "♥" : "♡"}
+                </button>
+
+                <button
+                    data-action="classify"
+                    data-id="${textoSeguro(musica.id)}"
+                    aria-label="Classificar música"
+                >
+                    ◇
+                </button>
+
             </div>
         `;
-        card.addEventListener('click', () => playSong(idx));
-        songListContainer.appendChild(card);
-    });
-}
 
-window.changeSongCategory = function(id, newCat) {
-    const song = musicDatabase.find(s => s.id === id);
-    if (song) {
-        song.category = newCat;
-        loadCategory(currentView);
     }
-}
 
-function setSongInfo(song, play = true) {
-    currentTitle.textContent = song.title;
-    currentArtist.textContent = song.artist;
-    albumCover.src = song.cover;
-    audioElement.src = song.src;
-    if(play) {
-        audioElement.play();
-        isPlaying = true;
-        updatePlayBtn();
+
+    function filtrosCategorias() {
+
+        const filtros = [
+            { id: "todas", nome: "Todas" },
+            { id: "preferidas", nome: "Preferidas" },
+            ...categorias,
+            { id: "sem-categoria", nome: "Sem categoria" }
+        ];
+
+        return `
+            <div class="chips">
+
+                ${filtros.map(categoria => `
+                    <button
+                        data-action="filter"
+                        data-id="${textoSeguro(categoria.id)}"
+                        class="${
+                            estado.categoria === categoria.id
+                                ? "active"
+                                : ""
+                        }"
+                    >
+                        ${textoSeguro(categoria.nome)}
+                    </button>
+                `).join("")}
+
+            </div>
+        `;
+
     }
+
+
+    function musicasFiltradas() {
+
+        const busca =
+            estado.busca.toLocaleLowerCase("pt-BR");
+
+        return musicas.filter(musica => {
+
+            const nomeCompleto =
+                `${musica.titulo} ${musica.artista || ""}`
+                    .toLocaleLowerCase("pt-BR");
+
+            const combinaBusca =
+                nomeCompleto.includes(busca);
+
+            const classificacoes =
+                categoriasDaMusica(musica);
+
+            let combinaCategoria = true;
+
+            if (estado.categoria === "preferidas") {
+
+                combinaCategoria = ehPreferida(musica);
+
+            } else if (
+                estado.categoria === "sem-categoria"
+            ) {
+
+                combinaCategoria =
+                    classificacoes.length === 0;
+
+            } else if (estado.categoria !== "todas") {
+
+                combinaCategoria =
+                    classificacoes.includes(
+                        estado.categoria
+                    );
+
+            }
+
+            return combinaBusca && combinaCategoria;
+
+        }).sort((a, b) => {
+
+            const comparacao =
+                String(a.titulo || "").localeCompare(
+                    String(b.titulo || ""),
+                    "pt-BR"
+                );
+
+            return estado.ordem === "za"
+                ? -comparacao
+                : comparacao;
+
+        });
+
+    }
+
+
+    function vazio(titulo, descricao) {
+
+        return `
+            <div class="empty">
+
+                ${imagemDaMusica({})}
+
+                <h2>${textoSeguro(titulo)}</h2>
+
+                <p>${textoSeguro(descricao)}</p>
+
+            </div>
+        `;
+
+    }
+
+
+    /* =====================================
+       PÁGINA INICIAL
+       ===================================== */
+
+    function paginaInicio() {
+
+        const preferidas = musicas.filter(ehPreferida);
+
+        return `
+            <div class="section-head">
+
+                <h2 style="margin-top:0">
+                    Suas preferidas
+                </h2>
+
+                <a href="#preferidas">
+                    Ver todas ›
+                </a>
+
+            </div>
+
+            ${
+                preferidas.length
+                    ? `
+                        <div class="favorites">
+
+                            ${preferidas.map(musica => `
+                                <div class="favorite">
+
+                                    <button
+                                        data-action="play"
+                                        data-id="${
+                                            textoSeguro(musica.id)
+                                        }"
+                                        style="
+                                            background:transparent;
+                                            border:0;
+                                            padding:0;
+                                        "
+                                    >
+                                        ${imagemDaMusica(musica)}
+
+                                        <strong>
+                                            ${
+                                                textoSeguro(
+                                                    musica.titulo
+                                                )
+                                            }
+                                        </strong>
+                                    </button>
+
+                                    <button
+                                        class="heart on"
+                                        data-action="favorite"
+                                        data-id="${
+                                            textoSeguro(musica.id)
+                                        }"
+                                        aria-label="
+                                            Remover das preferidas
+                                        "
+                                    >
+                                        ♥
+                                    </button>
+
+                                </div>
+                            `).join("")}
+
+                        </div>
+                    `
+                    : `
+                        <p>
+                            Toque no coração de uma música
+                            para encontrá-la aqui.
+                        </p>
+                    `
+            }
+
+            <div class="hero">
+
+                <div>
+
+                    <p>SUA COLEÇÃO. SEU MOMENTO.</p>
+
+                    <h1>Entre no seu ritmo.</h1>
+
+                    <p>Sound Love • Synthwave</p>
+
+                </div>
+
+                <button
+                    class="play"
+                    data-action="browse"
+                    aria-label="Explorar músicas"
+                >
+                    ▶
+                </button>
+
+            </div>
+
+            <h2>Categorias</h2>
+
+            <div class="chips">
+
+                ${categorias.map(categoria => `
+                    <button
+                        data-action="category"
+                        data-id="${textoSeguro(categoria.id)}"
+                    >
+                        ${textoSeguro(categoria.icone)}
+                        ${textoSeguro(categoria.nome)}
+                    </button>
+                `).join("")}
+
+            </div>
+
+            <div class="section-head">
+
+                <h2>Sua coleção</h2>
+
+                <a href="#musicas">Ver todas ›</a>
+
+            </div>
+
+            ${
+                musicas.length
+                    ? musicas.slice(0, 5)
+                        .map(linhaMusica)
+                        .join("")
+                    : vazio(
+                        "Sua coleção começa aqui",
+                        "Ainda não há músicas cadastradas."
+                    )
+            }
+
+            <div class="panel">
+
+                <h2 style="margin-top:0">
+                    Monte seu momento
+                </h2>
+
+                <p>
+                    Suas músicas organizadas para
+                    cada ocasião.
+                </p>
+
+                <button
+                    class="primary"
+                    data-action="moments"
+                >
+                    Meus momentos ›
+                </button>
+
+            </div>
+        `;
+
+    }
+
+
+    /* =====================================
+       BIBLIOTECA E BUSCA
+       ===================================== */
+
+    function paginaBiblioteca() {
+
+        return `
+            <h1>${
+                estado.pagina === "preferidas"
+                    ? "Suas preferidas"
+                    : "Minha coleção"
+            }</h1>
+
+            <p>Encontre a música para o seu momento.</p>
+
+            <div class="toolbar">
+
+                <input
+                    type="search"
+                    id="search"
+                    placeholder="Buscar músicas"
+                    aria-label="Buscar músicas"
+                    value="${textoSeguro(estado.busca)}"
+                >
+
+                <select
+                    id="sort"
+                    aria-label="Ordenar músicas"
+                >
+
+                    <option
+                        value="az"
+                        ${estado.ordem === "az"
+                            ? "selected"
+                            : ""}
+                    >
+                        A–Z
+                    </option>
+
+                    <option
+                        value="za"
+                        ${estado.ordem === "za"
+                            ? "selected"
+                            : ""}
+                    >
+                        Z–A
+                    </option>
+
+                </select>
+
+            </div>
+
+            ${filtrosCategorias()}
+
+            <p id="result-count"></p>
+
+            <div id="song-list"></div>
+        `;
+
+    }
+
+
+    function atualizarLista() {
+
+        const lista = document.getElementById("song-list");
+        const contador =
+            document.getElementById("result-count");
+
+        if (!lista || !contador) {
+            return;
+        }
+
+        const resultado = musicasFiltradas();
+
+        contador.textContent =
+            resultado.length === 1
+                ? "1 música"
+                : `${resultado.length} músicas`;
+
+        lista.innerHTML = resultado.length
+            ? resultado.map(linhaMusica).join("")
+            : vazio(
+                "Nenhuma música encontrada",
+                "Tente outra busca ou categoria."
+            );
+
+    }
+
+
+    /* =====================================
+       DESENHAR PÁGINAS
+       ===================================== */
+
+    function renderizar() {
+
+    desenharMenus();
+
+    if (estado.pagina === "inicio") {
+
+        pagina.innerHTML = paginaPlayer();
+
+    } else if (
+        estado.pagina === "musicas" ||
+        estado.pagina === "preferidas"
+    ) {
+
+        pagina.innerHTML = paginaBiblioteca();
+
+        atualizarLista();
+
+    } else if (estado.pagina === "player") {
+
+        pagina.innerHTML = paginaPlayer();
+
+{
+  const barraProgresso = document.getElementById("player-seek");
+
+  const percentualProgresso =
+    Number.isFinite(audio.duration) && audio.duration > 0
+      ? Math.min(100, Math.max(0, (audio.currentTime / audio.duration) * 100))
+      : 0;
+
+  if (barraProgresso) {
+    barraProgresso.style.setProperty(
+      "--progresso",
+      `${percentualProgresso}%`
+    );
+  }
 }
 
-function playSong(index) {
-    currentSongIndex = index;
-    setSongInfo(currentPlaylist[currentSongIndex], true);
+    } else if (estado.pagina === "momentos") {
+
+        pagina.innerHTML = vazio(
+            "Meus momentos",
+            "A criação das sequências será ativada nas próximas etapas."
+        );
+
+    } else if (estado.pagina === "ajustes") {
+
+        pagina.innerHTML = `
+            <h1>Seu Sound Love</h1>
+
+            <p>Personalize sua experiência.</p>
+
+            <div class="panel">
+
+                <h2 style="margin-top:0">
+                    Tema Synthwave
+                </h2>
+
+                <p>
+                    Roxo profundo, rosa neon
+                    e suas músicas em destaque.
+                </p>
+
+            </div>
+        `;
+
+    } else {
+
+        estado.pagina = "inicio";
+        pagina.innerHTML = paginaPlayer();
+
+    }
+
+    atualizarMiniPlayer();
+
 }
 
-function togglePlay() {
-    if(!audioElement.src) {
-        playSong(0);
+    /* =====================================
+   PLAYER DE MÚSICA
+   ===================================== */
+
+const audio = document.getElementById("audio");
+const miniPlayer = document.getElementById("mini");
+
+const reproducao = {
+    musicaId: null,
+    fila: [],
+    indice: -1,
+    repetir: false,
+    aleatorio: false,
+    erro: false
+};
+
+let tentativaReproducao = 0;
+
+
+function musicaAtual() {
+
+    return encontrarMusica(reproducao.musicaId);
+
+}
+
+
+function formatarTempo(segundos) {
+
+    if (!Number.isFinite(segundos)) {
+        return "0:00";
+    }
+
+    const minutos = Math.floor(segundos / 60);
+
+    const restante = Math.floor(segundos % 60)
+        .toString()
+        .padStart(2, "0");
+
+    return `${minutos}:${restante}`;
+
+}
+
+
+function capaPlayer(musica, classe = "") {
+
+    return `
+        <img
+            class="${classe}"
+            src="${textoSeguro(
+                musica.capa || capaPadrao
+            )}"
+            alt=""
+            data-capa
+        >
+    `;
+
+}
+
+
+function atualizarMiniPlayer() {
+
+    const musica = musicaAtual();
+
+    if (!musica || estado.pagina === "player") {
+
+        miniPlayer.style.display = "none";
+        return;
+
+    }
+
+    miniPlayer.style.display = "block";
+
+    miniPlayer.innerHTML = `
+        <div class="row">
+
+            ${capaPlayer(musica)}
+
+            <button
+                class="song-copy"
+                data-action="open-player"
+                style="text-align:left"
+            >
+                <strong>
+                    ${textoSeguro(musica.titulo)}
+                </strong>
+
+                <small>
+                    ${
+                        reproducao.erro
+                            ? "Arquivo indisponível"
+                            : textoSeguro(
+                                musica.artista ||
+                                "Sua coleção"
+                            )
+                    }
+                </small>
+            </button>
+
+            <button
+                class="play"
+                data-action="toggle-play"
+                aria-label="${
+                    audio.paused ? "Tocar" : "Pausar"
+                }"
+            >
+                ${audio.paused ? "▶" : "❚❚"}
+            </button>
+
+            <button
+                data-action="next-track"
+                aria-label="Próxima música"
+            >
+                ▸▸
+            </button>
+
+        </div>
+    `;
+
+}
+
+
+function paginaPlayer() {
+
+    const musica = musicaAtual();
+
+    if (!musica) {
+
+        return vazio(
+            "Escolha uma música",
+            "Abra sua coleção para começar."
+        );
+
+    }
+
+    return `
+        <button
+            class="back"
+            data-action="back-library"
+        >
+            ‹ Voltar à coleção
+        </button>
+
+        <div class="player">
+
+            ${capaPlayer(musica, "album")}
+
+            <h1>
+                ${textoSeguro(musica.titulo)}
+            </h1>
+
+            <p>
+                ${textoSeguro(
+                    musica.artista || "Sua coleção"
+                )}
+            </p>
+
+            <input
+                class="seek"
+                id="player-seek"
+                type="range"
+                min="0"
+                max="${
+                    Number.isFinite(audio.duration)
+                        ? audio.duration
+                        : 0
+                }"
+                value="${audio.currentTime || 0}"
+                step="0.1"
+                aria-label="Posição da música"
+                ${
+                    Number.isFinite(audio.duration)
+                        ? ""
+                        : "disabled"
+                }
+            >
+
+            <div class="times">
+
+                <span id="player-elapsed">
+                    ${formatarTempo(audio.currentTime)}
+                </span>
+
+                <span id="player-duration">
+                    ${formatarTempo(audio.duration)}
+                </span>
+
+            </div>
+
+            <div class="controls">
+
+                <button
+                    data-action="repeat-track"
+                    class="${
+                        reproducao.repetir
+                            ? "active"
+                            : ""
+                    }"
+                    aria-label="Repetir música"
+                    aria-pressed="${reproducao.repetir}"
+                >
+                    ↻
+                </button>
+
+                <button
+                    data-action="previous-track"
+                    aria-label="Música anterior"
+                >
+                    ◂◂
+                </button>
+
+                <button
+                    class="play"
+                    data-action="toggle-play"
+                    aria-label="${
+                        audio.paused
+                            ? "Tocar"
+                            : "Pausar"
+                    }"
+                >
+                    ${audio.paused ? "▶" : "❚❚"}
+                </button>
+
+                <button
+                    data-action="next-track"
+                    aria-label="Próxima música"
+                >
+                    ▸▸
+                </button>
+
+                <button
+                    data-action="shuffle-tracks"
+                    class="${
+                        reproducao.aleatorio
+                            ? "active"
+                            : ""
+                    }"
+                    aria-label="Reprodução aleatória"
+                    aria-pressed="${reproducao.aleatorio}"
+                >
+                    ⤨
+                </button>
+
+            </div>
+
+            <label>
+                Volume
+
+                <input
+                    class="volume"
+                    id="player-volume"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="${audio.volume}"
+                    aria-label="Volume"
+                >
+            </label>
+
+            <div
+                class="control-dock"
+                style="margin-top:25px"
+            >
+
+                <button
+                    class="heart ${
+                        ehPreferida(musica)
+                            ? "on"
+                            : ""
+                    }"
+                    data-action="favorite"
+                    data-id="${textoSeguro(musica.id)}"
+                    aria-pressed="${ehPreferida(musica)}"
+                >
+                    ${ehPreferida(musica) ? "♥" : "♡"}
+
+                    <small>Preferida</small>
+                </button>
+
+                <button
+                    data-action="classify"
+                    data-id="${textoSeguro(musica.id)}"
+                >
+                    ◇
+
+                    <small>Classificar</small>
+                </button>
+
+            </div>
+
+            ${
+                reproducao.erro
+                    ? `
+                        <div class="error">
+
+                            <strong>
+                                Não foi possível tocar
+                            </strong>
+
+                            <p>
+                                Confira o nome do MP3
+                                e seu caminho em musicas.js.
+                            </p>
+
+                            <button
+                                data-action="retry-track"
+                            >
+                                Tentar novamente
+                            </button>
+
+                        </div>
+                    `
+                    : ""
+            }
+
+        </div>
+    `;
+
+}
+
+
+async function iniciarAudio() {
+
+    const tentativa = ++tentativaReproducao;
+
+    try {
+
+        await audio.play();
+
+    } catch (erro) {
+
+        if (
+            tentativa !== tentativaReproducao ||
+            erro.name === "AbortError"
+        ) {
+            return;
+        }
+
+        if (erro.name === "NotAllowedError") {
+
+            avisar("Toque no botão para iniciar a música.");
+
+        } else {
+
+            reproducao.erro = true;
+            renderizar();
+
+        }
+
+    }
+
+}
+
+
+function carregarFaixa() {
+
+    const musica = musicaAtual();
+
+    if (!musica) {
         return;
     }
-    if(isPlaying) {
-        audioElement.pause();
-        isPlaying = false;
-    } else {
-        audioElement.play();
-        isPlaying = true;
+
+    reproducao.erro = false;
+
+    audio.src = musica.arquivo;
+    audio.load();
+
+    iniciarAudio();
+    renderizar();
+
+}
+
+
+function tocarMusica(id) {
+
+    const musica = encontrarMusica(id);
+
+    if (!musica) {
+        return;
     }
-    updatePlayBtn();
+
+    const lista = musicasFiltradas();
+
+    reproducao.fila = lista.some(item => item.id === id)
+        ? lista.map(item => item.id)
+        : musicas.map(item => item.id);
+
+    reproducao.indice = reproducao.fila.indexOf(id);
+    reproducao.musicaId = id;
+
+    carregarFaixa();
+    navegar("player");
+
 }
 
-function updatePlayBtn() {
-    playPauseBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+
+function alternarReproducao() {
+
+    if (!musicaAtual()) {
+        return;
+    }
+
+    if (reproducao.erro) {
+
+        carregarFaixa();
+        return;
+
+    }
+
+    if (audio.paused) {
+
+        iniciarAudio();
+
+    } else {
+
+        audio.pause();
+
+    }
+
 }
 
-function setupEvents() {
-    playPauseBtn.addEventListener('click', togglePlay);
-    nextBtn.addEventListener('click', () => {
-        if(currentPlaylist.length === 0) return;
-        currentSongIndex = (currentSongIndex + 1) % currentPlaylist.length;
-        playSong(currentSongIndex);
-    });
-    prevBtn.addEventListener('click', () => {
-        if(currentPlaylist.length === 0) return;
-        currentSongIndex = (currentSongIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-        playSong(currentSongIndex);
-    });
 
-    categoryButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            categoryButtons.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            loadCategory(e.target.getAttribute('data-category'));
-        });
-    });
+function proximaMusica() {
 
-    audioElement.addEventListener('timeupdate', () => {
-        if(audioElement.duration) {
-            const p = (audioElement.currentTime / audioElement.duration) * 100;
-            progress.style.width = `${p}%`;
-            currentTimeEl.textContent = formatTime(audioElement.currentTime);
-            durationEl.textContent = formatTime(audioElement.duration);
-        }
-    });
+    if (!reproducao.fila.length) {
+        return;
+    }
 
-    progressBar.addEventListener('click', (e) => {
-        const w = progressBar.clientWidth;
-        audioElement.currentTime = (e.offsetX / w) * audioElement.duration;
-    });
+    let proximoIndice = reproducao.indice + 1;
 
-    audioElement.addEventListener('ended', () => nextBtn.click());
+    if (
+        reproducao.aleatorio &&
+        reproducao.fila.length > 1
+    ) {
+
+        const deslocamento =
+            1 + Math.floor(
+                Math.random() *
+                (reproducao.fila.length - 1)
+            );
+
+        proximoIndice =
+            (reproducao.indice + deslocamento) %
+            reproducao.fila.length;
+
+    }
+
+    if (proximoIndice >= reproducao.fila.length) {
+
+        audio.pause();
+
+        avisar("Você chegou ao fim da sequência.");
+        return;
+
+    }
+
+    reproducao.indice = proximoIndice;
+
+    reproducao.musicaId =
+        reproducao.fila[proximoIndice];
+
+    carregarFaixa();
+
 }
 
-function formatTime(sec) {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
+
+function musicaAnterior() {
+
+    if (!musicaAtual()) {
+        return;
+    }
+
+    if (
+        audio.currentTime > 3 ||
+        reproducao.indice <= 0
+    ) {
+
+        audio.currentTime = 0;
+        iniciarAudio();
+        return;
+
+    }
+
+    reproducao.indice -= 1;
+
+    reproducao.musicaId =
+        reproducao.fila[reproducao.indice];
+
+    carregarFaixa();
+
 }
 
-window.addEventListener('DOMContentLoaded', initApp);
 
-// Lógica para exibir o Popup de Instalação PWA
-let deferredPrompt;
-const installBanner = document.getElementById('install-banner');
-const installBtn = document.getElementById('install-btn');
-const closeBanner = document.getElementById('close-banner');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Impede o navegador de mostrar o prompt nativo automático (para mostrarmos o nosso personalizado)
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // Exibe o nosso banner/popup
-    if (installBanner) {
-        installBanner.style.display = 'block';
+// Atualiza o preenchimento imediatamente ao ajustar o volume.
+document.addEventListener("input", (evento) => {
+    if (evento.target.id === "player-volume") {
+        evento.target.style.setProperty(
+            "--volume",
+            `${Number(evento.target.value) * 100}%`
+        );
     }
 });
 
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                console.log('Usuário aceitou instalar o app');
-            }
-            deferredPrompt = null;
-            installBanner.style.display = 'none';
+// Atualiza o progresso e os tempos da música.
+audio.addEventListener("timeupdate", () => {
+    const barraProgresso =
+        document.getElementById("player-seek");
+
+    const barraVolume =
+        document.getElementById("player-volume");
+
+    const decorrido =
+        document.getElementById("player-elapsed");
+
+    const duracao =
+        document.getElementById("player-duration");
+
+    const percentualProgresso =
+        Number.isFinite(audio.duration) && audio.duration > 0
+            ? Math.min(
+                100,
+                Math.max(
+                    0,
+                    (audio.currentTime / audio.duration) * 100
+                )
+            )
+            : 0;
+
+    if (barraProgresso) {
+        barraProgresso.value = audio.currentTime;
+
+        barraProgresso.style.setProperty(
+            "--progresso",
+            `${percentualProgresso}%`
+        );
+    }
+
+    if (barraVolume) {
+        barraVolume.style.setProperty(
+            "--volume",
+            `${audio.volume * 100}%`
+        );
+    }
+
+    if (decorrido) {
+        decorrido.textContent =
+            formatarTempo(audio.currentTime);
+    }
+
+    if (duracao) {
+        duracao.textContent =
+            formatarTempo(audio.duration);
+    }
+});
+
+
+audio.addEventListener("loadedmetadata", () => {
+
+    const musica = musicaAtual();
+
+    if (musica && Number.isFinite(audio.duration)) {
+
+        musica.duracao = audio.duration;
+
+    }
+
+    if (estado.pagina === "player") {
+        renderizar();
+    }
+
+});
+
+
+audio.addEventListener("play", () => {
+
+    if (estado.pagina === "player") {
+
+        renderizar();
+
+    } else {
+
+        atualizarMiniPlayer();
+
+    }
+
+});
+
+
+audio.addEventListener("pause", () => {
+
+    if (estado.pagina === "player") {
+
+        renderizar();
+
+    } else {
+
+        atualizarMiniPlayer();
+
+    }
+
+});
+
+
+audio.addEventListener("ended", () => {
+
+    if (reproducao.repetir) {
+
+        audio.currentTime = 0;
+        iniciarAudio();
+
+    } else {
+
+        proximaMusica();
+
+    }
+
+});
+
+
+audio.addEventListener("error", () => {
+
+    reproducao.erro = true;
+    renderizar();
+
+});
+
+
+document.addEventListener("input", evento => {
+
+    if (evento.target.id === "player-seek") {
+
+        if (Number.isFinite(audio.duration)) {
+
+            audio.currentTime =
+                Number(evento.target.value);
+
         }
+
+    }
+
+    if (evento.target.id === "player-volume") {
+
+        audio.volume = Number(evento.target.value);
+
+    }
+
+});
+
+
+    /* =====================================
+       AÇÕES
+       ===================================== */
+
+       
+
+    function executarAcao(acao, id) {
+
+        switch (acao) {
+
+            case "favorite":
+
+                alternarPreferida(id);
+                break;
+
+            case "browse":
+
+                estado.busca = "";
+                estado.categoria = "todas";
+
+                navegar("musicas");
+                break;
+
+            case "search":
+
+                estado.busca = "";
+                estado.categoria = "todas";
+
+                navegar("musicas");
+
+                document.getElementById("search")?.focus();
+                break;
+
+            case "settings":
+
+                navegar("ajustes");
+                break;
+
+            case "moments":
+
+                navegar("momentos");
+                break;
+
+            case "category":
+
+                estado.busca = "";
+                estado.categoria = id;
+
+                navegar("musicas");
+                break;
+
+            case "filter":
+
+                estado.categoria = id;
+
+                renderizar();
+                break;
+
+case "play":
+
+    tocarMusica(id);
+    break;
+
+case "open-player":
+
+    navegar("player");
+    break;
+
+case "back-library":
+
+    navegar("musicas");
+    break;
+
+case "toggle-play":
+
+    alternarReproducao();
+    break;
+
+case "next-track":
+
+    proximaMusica();
+    break;
+
+case "previous-track":
+
+    musicaAnterior();
+    break;
+
+case "repeat-track":
+
+    reproducao.repetir = !reproducao.repetir;
+
+    renderizar();
+
+    avisar(
+        reproducao.repetir
+            ? "Repetir música ativado."
+            : "Repetição desativada."
+    );
+    break;
+
+case "shuffle-tracks":
+
+    reproducao.aleatorio = !reproducao.aleatorio;
+
+    renderizar();
+
+    avisar(
+        reproducao.aleatorio
+            ? "Aleatório ativado."
+            : "Aleatório desativado."
+    );
+    break;
+
+case "retry-track":
+
+    carregarFaixa();
+    break;
+        }
+
+    }
+
+
+    /* =====================================
+       EVENTOS
+       ===================================== */
+
+    document.addEventListener("click", evento => {
+
+        const botao =
+            evento.target.closest("[data-action]");
+
+        if (!botao) {
+            return;
+        }
+
+        evento.preventDefault();
+
+        executarAcao(
+            botao.dataset.action,
+            botao.dataset.id
+        );
+
     });
+
+
+    document.addEventListener("input", evento => {
+
+        if (evento.target.id !== "search") {
+            return;
+        }
+
+        estado.busca = evento.target.value;
+
+        atualizarLista();
+
+    });
+
+
+    document.addEventListener("change", evento => {
+
+        if (evento.target.id !== "sort") {
+            return;
+        }
+
+        estado.ordem = evento.target.value;
+
+        atualizarLista();
+
+    });
+
+
+    document.addEventListener("error", evento => {
+
+        const imagem = evento.target;
+
+        if (
+            imagem.tagName !== "IMG" ||
+            !imagem.hasAttribute("data-capa")
+        ) {
+            return;
+        }
+
+        imagem.removeAttribute("data-capa");
+        imagem.src = capaPadrao;
+
+    }, true);
+
+
+    window.addEventListener("hashchange", () => {
+
+        estado.pagina =
+            location.hash.substring(1) || "inicio";
+
+        if (estado.pagina === "preferidas") {
+
+            estado.categoria = "preferidas";
+            estado.busca = "";
+
+        }
+
+        renderizar();
+
+        window.scrollTo(0, 0);
+
+    });
+
+
+    /* =====================================
+       INICIALIZAÇÃO
+       ===================================== */
+
+    carregarDados();
+
+// Prepara a primeira preferida, sem tocar automaticamente.
+{
+    const faixaInicial =
+        musicas.find(musica => ehPreferida(musica)) ||
+        musicas[0];
+
+    if (faixaInicial) {
+        reproducao.fila = musicas.map(musica => musica.id);
+
+        reproducao.indice =
+            reproducao.fila.indexOf(faixaInicial.id);
+
+        reproducao.musicaId = faixaInicial.id;
+        reproducao.erro = false;
+
+        audio.pause();
+        audio.src = faixaInicial.arquivo;
+        audio.load();
+    }
 }
 
-if (closeBanner) {
-    closeBanner.addEventListener('click', () => {
-        installBanner.style.display = 'none';
-    });
-}
+    estado.pagina =
+        location.hash.substring(1) || "inicio";
+
+    if (estado.pagina === "preferidas") {
+        estado.categoria = "preferidas";
+    }
+
+    renderizar();
+
+
+    /* Base disponível para os próximos módulos. */
+
+    return {
+        categorias,
+        musicas,
+        estado,
+        dados,
+        capaPadrao,
+
+        textoSeguro,
+        avisar,
+        salvarDados,
+        encontrarMusica,
+        ehPreferida,
+        categoriasDaMusica,
+        nomesDasCategorias,
+        imagemDaMusica,
+        alternarPreferida,
+        navegar,
+        musicasFiltradas,
+        renderizar
+    };
+
+})();
