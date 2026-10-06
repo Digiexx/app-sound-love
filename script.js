@@ -2564,6 +2564,7 @@ if (destino === "ajustes") {
     /* Base disponível para os próximos módulos. */
 
     return {
+        estaTocando: () => !audio.paused,
         categorias,
         musicas,
         estado,

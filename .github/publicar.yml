@@ -1,0 +1,120 @@
+name: Publicar Sound Love
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sound-love-pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v6
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar app e gerar versão automática
+        env:
+          SOUND_COMMIT: ${{ github.sha }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import re
+          import shutil
+          from pathlib import Path
+
+          origem = Path(".")
+          destino = Path("_site")
+
+          ignorados = {
+              ".git",
+              ".github",
+              ".vscode",
+              "node_modules",
+              "corel",
+              "_site"
+          }
+
+          destino.mkdir(exist_ok=True)
+
+          for item in origem.iterdir():
+              if item.name.startswith(".") or item.name in ignorados:
+                  continue
+
+              alvo = destino / item.name
+
+              if item.is_dir():
+                  shutil.copytree(item, alvo, dirs_exist_ok=True)
+              elif item.is_file():
+                  shutil.copy2(item, alvo)
+
+          versao = os.environ["SOUND_COMMIT"]
+
+          (destino / "versao.json").write_text(
+              json.dumps({"versao": versao}),
+              encoding="utf-8"
+          )
+
+          pagina = destino / "index.html"
+          html = pagina.read_text(encoding="utf-8")
+
+          html = re.sub(
+              r'<meta\s+name=["\']sound-love-versao["\'][^>]*>',
+              "",
+              html,
+              flags=re.IGNORECASE
+          )
+
+          marcador = (
+              '<meta name="sound-love-versao" '
+              f'content="{versao}">'
+          )
+
+          html, quantidade = re.subn(
+              r"</head\s*>",
+              lambda resultado: marcador + "\n" + resultado.group(0),
+              html,
+              count=1,
+              flags=re.IGNORECASE
+          )
+
+          if quantidade != 1:
+              raise RuntimeError("Não foi encontrado </head> no index.html.")
+
+          pagina.write_text(html, encoding="utf-8")
+
+          worker = destino / "service-worker.js"
+          codigo = worker.read_text(encoding="utf-8")
+
+          worker.write_text(
+              f"/* Publicação: {versao} */\n" + codigo,
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Enviar arquivos para publicação
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Publicar no GitHub Pages
+        id: publicacao
+        uses: actions/deploy-pages@v4
