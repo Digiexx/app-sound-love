@@ -45,11 +45,49 @@
             "#atualizacao-sound-percentual"
         ).textContent = `${percentual}%`;
 
-        painel.querySelector(
-            "#atualizacao-sound-contagem"
-        ).textContent = situacao.total
+        const contagem = situacao.total
             ? `${situacao.concluidos} de ${situacao.total} arquivos`
             : "Preparando…";
+
+        const bytesTotais = Math.max(
+            0,
+            Number(situacao.bytesTotais) || 0
+        );
+
+        const bytesProntos = Math.min(
+            bytesTotais,
+            Math.max(
+                0,
+                (Number(situacao.bytesConcluidos) || 0) +
+                (Number(situacao.bytesRecebidos) || 0)
+            )
+        );
+
+        const unidade = bytesTotais >= 1024 * 1024
+            ? 1024 * 1024
+            : 1024;
+
+        const sigla = bytesTotais >= 1024 * 1024
+            ? "MB"
+            : "KB";
+
+        const formatarQuantidade = (bytes) => {
+
+            return (bytes / unidade).toLocaleString(
+                "pt-BR",
+                {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1
+                }
+            );
+
+        };
+
+        painel.querySelector(
+            "#atualizacao-sound-contagem"
+        ).textContent = bytesTotais > 0
+            ? `${contagem} · ${formatarQuantidade(bytesProntos)} de ${formatarQuantidade(bytesTotais)} ${sigla}`
+            : contagem;
 
         painel.querySelector(
             "#atualizacao-sound-status"

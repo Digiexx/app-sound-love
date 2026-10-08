@@ -36,6 +36,75 @@ self.addEventListener("activate", (evento) => {
 
 });
 
+self.addEventListener("message", (evento) => {
+
+    if (
+        evento.data?.tipo !==
+        "sound-love-consultar-janelas"
+    ) {
+        return;
+    }
+
+    const porta = evento.ports?.[0];
+
+    if (!porta) {
+        return;
+    }
+
+    evento.waitUntil((async () => {
+
+        try {
+
+            const janelas = await self.clients.matchAll({
+                type: "window",
+                includeUncontrolled: true
+            });
+
+            const inicio = new URL(
+                self.registration.scope
+            );
+
+            const quantidade = janelas.filter(
+                (janela) => {
+
+                    const endereco = new URL(
+                        janela.url
+                    );
+
+                    return (
+                        endereco.origin === inicio.origin &&
+                        endereco.pathname.startsWith(
+                            inicio.pathname
+                        )
+                    );
+
+                }
+            ).length;
+
+            porta.postMessage({
+                tipo: "sound-love-janelas",
+                escopo: inicio.href,
+                quantidade
+            });
+
+        } catch {
+
+            porta.postMessage({
+                tipo: "sound-love-janelas",
+                escopo: self.registration.scope,
+                quantidade: null
+            });
+
+        } finally {
+
+            porta.close();
+
+        }
+
+    })());
+
+});
+
 
 /* =========================================
    LEITURA DOS ARQUIVOS SALVOS

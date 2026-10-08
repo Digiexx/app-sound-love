@@ -20,6 +20,8 @@ window.SOUND_MUSICAS = [
         preferida: true
     },
 
+
+
     {
         id: "musica-002",
 
@@ -53,10 +55,45 @@ window.SOUND_MUSICAS = [
         categorias: [],
 
         preferida: false
+
     },
 
-     {
+    {
         id: "musica-004",
+
+        titulo: "Sensação de Prazer",
+
+        artista: "Sua coleção",
+
+        arquivo: "musicas/sensação-de-Prazer.mp3",
+
+        capa: "capas/sensação-de-Prazer.webp",
+
+        categorias: [],
+
+        preferida: false
+
+    },
+
+    {
+        id: "musica-005",
+
+        titulo: "Delícias no Ouvido",
+
+        artista: "Sua coleção",
+
+        arquivo: "musicas/delícias-no-ouvido.mp3",
+
+        capa: "capas/delícias-no-Ouvido.webp",
+
+        categorias: [],
+
+        preferida: false
+
+    },
+
+    {
+        id: "musica-006",
 
         titulo: "Sussurro",
 
@@ -69,6 +106,8 @@ window.SOUND_MUSICAS = [
         categorias: [],
 
         preferida: false
-    }
+    } 
 
+
+    
 ];

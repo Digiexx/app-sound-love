@@ -109,10 +109,84 @@ jobs:
               encoding="utf-8"
           )
 
-          # Identifica o conteúdo de cada arquivo publicado.
           import hashlib
+          from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
           bloco_bytes = 1024 * 1024
+
+          # Atualiza os endereços dos ícones conforme o conteúdo das imagens.
+          manifesto = destino / "manifest.json"
+
+          dados_manifesto = json.loads(
+              manifesto.read_text(encoding="utf-8")
+          )
+
+          for icone in dados_manifesto["icons"]:
+              endereco = urlsplit(icone["src"])
+
+              if (
+                  endereco.scheme or
+                  endereco.netloc or
+                  not endereco.path or
+                  endereco.path.startswith("/")
+              ):
+                  raise RuntimeError(
+                      "Os ícones precisam usar caminhos relativos dentro do projeto."
+                  )
+
+              arquivo_icone = (
+                  destino / unquote(endereco.path)
+              ).resolve()
+
+              if (
+                  not arquivo_icone.is_relative_to(destino.resolve()) or
+                  not arquivo_icone.is_file()
+              ):
+                  raise RuntimeError(
+                      f"Ícone não encontrado dentro da publicação: {icone['src']}"
+                  )
+
+              identificacao_icone = hashlib.sha256()
+
+              with arquivo_icone.open("rb") as conteudo:
+                  for trecho in iter(
+                      lambda: conteudo.read(bloco_bytes),
+                      b""
+                  ):
+                      identificacao_icone.update(trecho)
+
+              parametros = [
+                  (nome, valor)
+                  for nome, valor in parse_qsl(
+                      endereco.query,
+                      keep_blank_values=True
+                  )
+                  if nome != "v"
+              ]
+
+              parametros.append((
+                  "v",
+                  identificacao_icone.hexdigest()
+              ))
+
+              icone["src"] = urlunsplit((
+                  endereco.scheme,
+                  endereco.netloc,
+                  endereco.path,
+                  urlencode(parametros),
+                  endereco.fragment
+              ))
+
+          manifesto.write_text(
+              json.dumps(
+                  dados_manifesto,
+                  ensure_ascii=False,
+                  indent=4
+              ),
+              encoding="utf-8"
+          )
+
+          # Identifica o conteúdo de cada arquivo publicado.
 
           extensoes = {
               ".html", ".css", ".js", ".json",
