@@ -349,9 +349,92 @@
             </div>
         `;
 
+        let acessoLiberado = false;
+
+        // Mantém o aplicativo oculto até validar a senha.
+        const bloqueioVisual = document.createElement("style");
+
+        bloqueioVisual.textContent = `
+            html[data-acesso-sound="bloqueado"] body > :not(dialog):not(script):not(style):not(link) {
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
+        `;
+
+        document.head.appendChild(bloqueioVisual);
+
+        document.documentElement.dataset.acessoSound =
+            "bloqueado";
+
+        // Bloqueia também a interação por teclado.
+        const elementosBloqueados = Array.from(
+            document.body.children
+        ).filter((elemento) => {
+            return ![
+                "DIALOG",
+                "SCRIPT",
+                "STYLE",
+                "LINK"
+            ].includes(elemento.tagName);
+        }).map((elemento) => {
+            const inertAnterior = elemento.inert;
+
+            elemento.inert = true;
+
+            return {
+                elemento,
+                inertAnterior
+            };
+        });
+
+        function liberarConteudo() {
+
+            acessoLiberado = true;
+
+            elementosBloqueados.forEach((item) => {
+                item.elemento.inert = item.inertAnterior;
+            });
+
+            delete document.documentElement.dataset.acessoSound;
+
+            bloqueioVisual.remove();
+
+        }
+
+        function manterEntradaAberta() {
+
+            if (
+                acessoLiberado ||
+                !entrada.isConnected ||
+                entrada.open
+            ) {
+                return;
+            }
+
+            entrada.showModal();
+
+        }
+
+        entrada.setAttribute("closedby", "none");
+
         entrada.addEventListener("cancel", (evento) => {
             evento.preventDefault();
         });
+
+        // Se o navegador fechar a janela sem autenticação,
+        // o conteúdo continua bloqueado e a entrada reabre.
+        entrada.addEventListener("close", () => {
+
+            if (!acessoLiberado) {
+                manterEntradaAberta();
+            }
+
+        });
+
+        window.addEventListener(
+            "pageshow",
+            manterEntradaAberta
+        );
 
         document.body.appendChild(entrada);
 
@@ -403,6 +486,13 @@
             }
 
             campo.value = "";
+
+            liberarConteudo();
+
+            window.removeEventListener(
+                "pageshow",
+                manterEntradaAberta
+            );
 
             entrada.close();
             entrada.remove();
