@@ -65,14 +65,13 @@ window.SOUND_MUSICAS = [
 
         artista: "Sua coleção",
 
-        arquivo: "musicas/sensação-de-Prazer.mp3",
+        arquivo: "musicas/sensacao-de-prazer.mp3",
 
-        capa: "capas/sensação-de-Prazer.webp",
+        capa: "capas/sensacao-de-prazer.webp",
 
         categorias: [],
 
         preferida: false
-
     },
 
     {
@@ -82,14 +81,13 @@ window.SOUND_MUSICAS = [
 
         artista: "Sua coleção",
 
-        arquivo: "musicas/delícias-no-ouvido.mp3",
+        arquivo: "musicas/delicias-no-ouvido.mp3",
 
-        capa: "capas/delícias-no-Ouvido.webp",
+        capa: "capas/delicias-no-ouvido.webp",
 
         categorias: [],
 
         preferida: false
-
     },
 
     {
