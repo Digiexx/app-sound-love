@@ -270,6 +270,22 @@
                         Sua senha de acesso
                     </label>
 
+                    <div class="entrada-sound-pin">
+
+                        <div
+                            class="entrada-sound-pin-casas"
+                            aria-hidden="true"
+                        >
+                            <span class="entrada-sound-pin-casa"></span>
+                            <span class="entrada-sound-pin-casa"></span>
+                            <span class="entrada-sound-pin-casa"></span>
+                            <span class="entrada-sound-pin-casa"></span>
+                            <span class="entrada-sound-pin-casa"></span>
+                            <span class="entrada-sound-pin-casa"></span>
+                        </div>
+
+                    </div>
+
                     <div class="entrada-sound-campo">
 
                         <svg
@@ -449,6 +465,118 @@
 
         const mostrarSenha =
             entrada.querySelector("#entrada-sound-mostrar");
+
+        const painelCodigo =
+            entrada.querySelector(".entrada-sound-pin");
+
+        const casasCodigo = Array.from(
+            entrada.querySelectorAll(".entrada-sound-pin-casa")
+        );
+
+        const campoAntigo =
+            campo.closest(".entrada-sound-campo");
+
+        if (
+            painelCodigo &&
+            casasCodigo.length === SENHA_ACESSO.length &&
+            campoAntigo
+        ) {
+
+            // Usa o mesmo campo que já valida o acesso.
+            painelCodigo.appendChild(campo);
+
+            // Retira a caixa antiga do visual.
+            campoAntigo.hidden = true;
+            campoAntigo.style.display = "none";
+
+            painelCodigo.style.position = "relative";
+
+            campo.maxLength = SENHA_ACESSO.length;
+
+            campo.setAttribute(
+                "aria-label",
+                "Código de acesso de seis dígitos"
+            );
+
+            // O campo recebe a digitação sobre os quadrados.
+            // Os números serão representados por pontos.
+            Object.assign(campo.style, {
+                position: "absolute",
+                inset: "0",
+                width: "100%",
+                height: "100%",
+                minWidth: "0",
+                minHeight: "0",
+                margin: "0",
+                padding: "0",
+                border: "0",
+                boxSizing: "border-box",
+                opacity: "0",
+                fontSize: "16px",
+                cursor: "text",
+                zIndex: "2"
+            });
+
+            function atualizarCasasCodigo() {
+
+                const codigo = campo.value
+                    .replace(/\D/g, "")
+                    .slice(0, SENHA_ACESSO.length);
+
+                if (campo.value !== codigo) {
+                    campo.value = codigo;
+                }
+
+                const estaDigitando =
+                    document.activeElement === campo;
+
+                const posicaoAtiva = Math.min(
+                    campo.selectionStart ?? codigo.length,
+                    casasCodigo.length - 1
+                );
+
+                casasCodigo.forEach((casa, indice) => {
+
+                    const preenchida =
+                        indice < codigo.length;
+
+                    casa.textContent =
+                        preenchida ? "●" : "";
+
+                    casa.classList.toggle(
+                        "preenchida",
+                        preenchida
+                    );
+
+                    casa.classList.toggle(
+                        "ativa",
+                        estaDigitando &&
+                        indice === posicaoAtiva
+                    );
+
+                });
+
+            }
+
+            [
+                "input",
+                "focus",
+                "blur",
+                "click",
+                "keyup",
+                "select"
+            ].forEach((nomeEvento) => {
+
+                campo.addEventListener(
+                    nomeEvento,
+                    atualizarCasasCodigo
+                );
+
+            });
+
+            atualizarCasasCodigo();
+
+        }
 
         const ocultacaoVisualDisponivel =
             CSS.supports("-webkit-text-security", "disc");

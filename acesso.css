@@ -490,3 +490,75 @@
         transition: none;
     }
 }
+
+/* =========================================
+   ENTRADA — CÓDIGO EM SEIS QUADRADOS
+   ========================================= */
+
+#entrada-sound-love .entrada-sound-pin {
+    margin: 14px 0 18px;
+}
+
+#entrada-sound-love .entrada-sound-pin-casas {
+    display: grid;
+
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+}
+
+#entrada-sound-love .entrada-sound-pin-casa {
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    height: clamp(42px, 12vw, 56px);
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 45%, transparent);
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--accent) 9%, transparent),
+            rgba(0, 0, 0, 0.35)
+        );
+
+    color: var(--accent);
+
+    font-family: inherit;
+    font-size: 23px;
+    font-weight: 400;
+    line-height: 1;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+#entrada-sound-love .entrada-sound-pin-casa.preenchida {
+    border-color:
+        color-mix(in srgb, var(--accent) 70%, transparent);
+
+    background:
+        color-mix(in srgb, var(--accent) 12%, var(--bg));
+}
+
+#entrada-sound-love .entrada-sound-pin-casa.ativa {
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 12px var(--glow),
+        inset 0 0 10px var(--glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #entrada-sound-love .entrada-sound-pin-casa {
+        transition: none;
+    }
+}

@@ -35,6 +35,15 @@
             return;
         }
 
+        const downloadEmAndamento =
+            window.SoundLoveOffline
+                ?.obterEstado()
+                .baixando === true;
+
+        if (downloadEmAndamento) {
+            return;
+        }
+
         const app = window.SoundLove;
 
         // Aguarda a integração com o player.

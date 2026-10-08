@@ -3743,3 +3743,284 @@ dialog.painel-sound[open] {
     box-shadow:
         inset 0 0 12px var(--glow);
 }
+
+/* =========================================
+   AJUSTES — COLEÇÃO OFFLINE
+   ========================================= */
+
+.ajustes-offline {
+    position: relative;
+
+    margin-top: 22px;
+    padding: 22px;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 35%, transparent);
+
+    border-radius: 22px;
+
+    background:
+        radial-gradient(
+            ellipse at top right,
+            color-mix(in srgb, var(--accent) 13%, transparent),
+            transparent 70%
+        ),
+        rgba(0, 0, 0, 0.28);
+
+    box-shadow:
+        inset 0 0 20px
+            color-mix(in srgb, var(--accent) 5%, transparent),
+        0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.ajustes-offline,
+.ajustes-offline * {
+    box-sizing: border-box;
+}
+
+.ajustes-offline [hidden] {
+    display: none !important;
+}
+
+.ajustes-offline-cabecalho {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+    margin-bottom: 20px;
+}
+
+.ajustes-offline-cabecalho > div {
+    min-width: 0;
+}
+
+.ajustes-offline-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 40%, transparent);
+
+    border-radius: 15px;
+
+    background:
+        color-mix(in srgb, var(--accent) 10%, transparent);
+
+    color: var(--accent);
+
+    box-shadow:
+        inset 0 0 12px var(--glow);
+
+    filter: drop-shadow(0 0 5px var(--glow));
+}
+
+.ajustes-offline-cabecalho h3 {
+    margin: 0 0 6px;
+
+    color: var(--text);
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.ajustes-offline-cabecalho p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ajustes-offline .ajustes-offline-baixar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 48px;
+
+    padding: 12px 16px;
+
+    border: 0;
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            125deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    color: var(--bg);
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 18px var(--glow);
+
+    transition:
+        box-shadow 0.25s ease,
+        opacity 0.25s ease;
+}
+
+.ajustes-offline-baixar:hover:not(:disabled) {
+    box-shadow:
+        0 4px 26px var(--glow),
+        0 0 12px var(--glow);
+}
+
+.ajustes-offline-baixar:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+}
+
+.ajustes-offline-baixar:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.ajustes-offline-andamento {
+    margin-top: 20px;
+}
+
+.ajustes-offline-numeros {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+    margin-bottom: 10px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.ajustes-offline-numeros strong {
+    color: var(--accent);
+
+    font-size: 12px;
+    font-weight: 500;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.ajustes-offline-progresso {
+    display: block;
+
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    border: 0;
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ajustes-offline-progresso::-webkit-progress-bar {
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ajustes-offline-progresso::-webkit-progress-value {
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    box-shadow: 0 0 10px var(--glow);
+}
+
+.ajustes-offline-progresso::-moz-progress-bar {
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    box-shadow: 0 0 10px var(--glow);
+}
+
+.ajustes-offline-status {
+    margin: 15px 0 0;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    overflow-wrap: anywhere;
+}
+
+.ajustes-offline[data-completo="true"]
+.ajustes-offline-status {
+    color: var(--accent);
+
+    text-shadow: 0 0 12px var(--glow);
+}
+
+.ajustes-offline-erro {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 35%, transparent);
+
+    border-radius: 12px;
+
+    background:
+        color-mix(in srgb, var(--accent) 8%, transparent);
+
+    color: var(--text);
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    overflow-wrap: anywhere;
+}
+
+.ajustes-offline-nota {
+    display: block;
+
+    margin-top: 14px;
+    padding-top: 12px;
+
+    border-top: 1px solid var(--line);
+
+    color: var(--muted);
+
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ajustes-offline-baixar {
+        transition: none;
+    }
+}

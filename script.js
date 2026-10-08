@@ -514,6 +514,108 @@ const paginasMenu = [
 
             </div>
 
+            <section
+                class="ajustes-offline"
+                aria-labelledby="ajustes-offline-titulo"
+            >
+
+                <div class="ajustes-offline-cabecalho">
+
+                    <span
+                        class="ajustes-offline-icone"
+                        aria-hidden="true"
+                    >
+                        <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M12 3v12"/>
+                            <path d="m7 10 5 5 5-5"/>
+                            <path d="M5 16v4h14v-4"/>
+                        </svg>
+                    </span>
+
+                    <div>
+
+                        <h3 id="ajustes-offline-titulo">
+                            Seu clima, sem internet.
+                        </h3>
+
+                        <p>
+                            Salve suas músicas, capas e temas
+                            neste aparelho.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="ajustes-offline-baixar"
+                    id="ajustes-offline-baixar"
+                    aria-describedby="ajustes-offline-status"
+                >
+                    Baixar para ouvir offline
+                </button>
+
+                <div
+                    class="ajustes-offline-andamento"
+                    id="ajustes-offline-andamento"
+                    hidden
+                >
+
+                    <div class="ajustes-offline-numeros">
+
+                        <span id="ajustes-offline-contagem">
+                            Preparando…
+                        </span>
+
+                        <strong id="ajustes-offline-percentual">
+                            0%
+                        </strong>
+
+                    </div>
+
+                    <progress
+                        class="ajustes-offline-progresso"
+                        id="ajustes-offline-progresso"
+                        max="100"
+                        value="0"
+                        aria-label="Progresso do download"
+                    ></progress>
+
+                </div>
+
+                <p
+                    class="ajustes-offline-status"
+                    id="ajustes-offline-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Baixe sua coleção para ouvir sem internet.
+                </p>
+
+                <p
+                    class="ajustes-offline-erro"
+                    id="ajustes-offline-erro"
+                    role="alert"
+                    hidden
+                ></p>
+
+                <small class="ajustes-offline-nota">
+                    Ao adicionar novas músicas,
+                    baixe a coleção novamente.
+                </small>
+
+            </section>
+
 
         `;
 
@@ -526,6 +628,139 @@ const paginasMenu = [
                 executarAcao("open-themes");
 
             });
+
+        // Remove os ouvintes da abertura anterior.
+        painel.soundOfflineControle?.abort();
+
+        const controleOffline = new AbortController();
+
+        painel.soundOfflineControle = controleOffline;
+
+        const botaoOffline =
+            painel.querySelector("#ajustes-offline-baixar");
+
+        const andamentoOffline =
+            painel.querySelector("#ajustes-offline-andamento");
+
+        const contagemOffline =
+            painel.querySelector("#ajustes-offline-contagem");
+
+        const percentualOffline =
+            painel.querySelector("#ajustes-offline-percentual");
+
+        const progressoOffline =
+            painel.querySelector("#ajustes-offline-progresso");
+
+        const statusOffline =
+            painel.querySelector("#ajustes-offline-status");
+
+        const erroOffline =
+            painel.querySelector("#ajustes-offline-erro");
+
+        const secaoOffline =
+            painel.querySelector(".ajustes-offline");
+
+        function atualizarDownloadOffline(situacao) {
+
+            const percentual = Math.min(
+                100,
+                Math.max(0, Number(situacao.progresso) || 0)
+            );
+
+            botaoOffline.disabled = situacao.baixando;
+
+            botaoOffline.textContent = situacao.baixando
+                ? "Baixando sua coleção…"
+                : situacao.completo
+                    ? "Atualizar download"
+                    : "Baixar para ouvir offline";
+
+            secaoOffline.setAttribute(
+                "aria-busy",
+                String(situacao.baixando)
+            );
+
+            secaoOffline.dataset.completo =
+                String(situacao.completo);
+
+            andamentoOffline.hidden =
+                !situacao.baixando && !situacao.completo;
+
+            contagemOffline.textContent = situacao.total
+                ? `${situacao.concluidos} de ${situacao.total} arquivos`
+                : "Preparando…";
+
+            percentualOffline.textContent =
+                `${percentual}%`;
+
+            progressoOffline.value = percentual;
+
+            statusOffline.textContent =
+                situacao.mensagem;
+
+            erroOffline.textContent =
+                situacao.erro || "";
+
+            erroOffline.hidden = !situacao.erro;
+
+        }
+
+        const moduloOffline = window.SoundLoveOffline;
+
+        if (moduloOffline) {
+
+            atualizarDownloadOffline(
+                moduloOffline.obterEstado()
+            );
+
+            window.addEventListener(
+                "sound-love-offline-status",
+                (evento) => {
+
+                    atualizarDownloadOffline(evento.detail);
+
+                },
+                { signal: controleOffline.signal }
+            );
+
+            botaoOffline.addEventListener(
+                "click",
+                () => {
+
+                    moduloOffline.baixar();
+
+                },
+                { signal: controleOffline.signal }
+            );
+
+            moduloOffline.verificar();
+
+        } else {
+
+            botaoOffline.disabled = true;
+
+            statusOffline.textContent =
+                "O módulo offline não foi carregado.";
+
+            erroOffline.textContent =
+                "Confira se offline.js está incluído no index.html.";
+
+            erroOffline.hidden = false;
+
+        }
+
+        painel.addEventListener(
+            "close",
+            () => {
+
+                controleOffline.abort();
+
+            },
+            {
+                once: true,
+                signal: controleOffline.signal
+            }
+        );
 
         const controlesEfeitos = [
             {
