@@ -4024,3 +4024,342 @@ dialog.painel-sound[open] {
         transition: none;
     }
 }
+/* =========================================
+   SOUND LOVE — PAINEL DE ATUALIZAÇÃO
+   ========================================= */
+
+#atualizacao-sound-love {
+    box-sizing: border-box;
+
+    width: min(420px, calc(100% - 36px));
+    max-width: none;
+    max-height: calc(100dvh - 36px);
+
+    margin: auto;
+    padding: 0;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 65%, transparent);
+
+    border-radius: 28px;
+
+    background:
+        radial-gradient(
+            ellipse at top,
+            color-mix(in srgb, var(--accent) 16%, transparent),
+            transparent 70%
+        ),
+        var(--bg);
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    box-shadow:
+        0 0 26px var(--glow),
+        0 24px 70px rgba(0, 0, 0, 0.5),
+        inset 0 0 24px
+            color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+#atualizacao-sound-love:not([open]) {
+    display: none;
+}
+
+#atualizacao-sound-love *,
+#atualizacao-sound-love *::before,
+#atualizacao-sound-love *::after {
+    box-sizing: border-box;
+}
+
+#atualizacao-sound-love [hidden] {
+    display: none !important;
+}
+
+#atualizacao-sound-love::backdrop {
+    background: rgba(0, 0, 0, 0.65);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.atualizacao-sound-conteudo {
+    padding: 36px 26px 28px;
+
+    text-align: center;
+}
+
+.atualizacao-sound-emblema {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 72px;
+    height: 72px;
+
+    margin: 0 auto 22px;
+
+    overflow: hidden;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 65%, transparent);
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--accent) 22%, transparent),
+            color-mix(in srgb, var(--accent2) 8%, transparent)
+        );
+
+    color: var(--accent);
+
+    box-shadow:
+        0 0 22px var(--glow),
+        inset 0 0 16px var(--glow);
+}
+
+.atualizacao-sound-emblema svg {
+    flex-shrink: 0;
+
+    filter: drop-shadow(0 0 7px var(--glow));
+}
+
+.atualizacao-sound-emblema::after {
+    content: "";
+
+    position: absolute;
+    inset: -30%;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            105deg,
+            transparent 35%,
+            rgba(255, 255, 255, 0.55) 50%,
+            transparent 65%
+        );
+
+    transform: translateX(-180%);
+
+    animation:
+        sound-love-atualizacao-brilho
+        4.8s
+        ease-in-out
+        infinite;
+}
+
+.atualizacao-sound-assinatura {
+    margin: 0 0 12px;
+
+    color: var(--accent);
+
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 3px;
+
+    text-shadow: 0 0 14px var(--glow);
+}
+
+#atualizacao-sound-titulo {
+    margin: 0;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.4px;
+}
+
+.atualizacao-sound-descricao {
+    margin: 12px 0 28px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.atualizacao-sound-numeros {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+    margin-bottom: 12px;
+
+    text-align: left;
+}
+
+#atualizacao-sound-contagem {
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+#atualizacao-sound-percentual {
+    color: var(--accent);
+
+    font-size: 14px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+
+    text-shadow: 0 0 12px var(--glow);
+}
+
+#atualizacao-sound-progresso {
+    display: block;
+
+    width: 100%;
+    height: 7px;
+
+    overflow: hidden;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    border: 0;
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#atualizacao-sound-progresso::-webkit-progress-bar {
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#atualizacao-sound-progresso::-webkit-progress-value {
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    box-shadow: 0 0 12px var(--glow);
+}
+
+#atualizacao-sound-progresso::-moz-progress-bar {
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent2)
+        );
+}
+
+#atualizacao-sound-status {
+    margin: 17px 0 0;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    line-height: 1.7;
+
+    overflow-wrap: anywhere;
+}
+
+#atualizacao-sound-erro {
+    margin: 18px 0 0;
+    padding: 13px 15px;
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 40%, transparent);
+
+    border-radius: 14px;
+
+    background:
+        color-mix(in srgb, var(--accent) 9%, transparent);
+
+    color: var(--text);
+
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.6;
+
+    overflow-wrap: anywhere;
+}
+
+.atualizacao-sound-acoes {
+    display: grid;
+
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.atualizacao-sound-acoes button {
+    width: 100%;
+    min-height: 46px;
+
+    padding: 12px 16px;
+
+    border: 0;
+    border-radius: 14px;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+
+    cursor: pointer;
+}
+
+#atualizacao-sound-tentar {
+    background:
+        linear-gradient(
+            125deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    color: var(--bg);
+
+    box-shadow: 0 4px 18px var(--glow);
+}
+
+#atualizacao-sound-continuar {
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 30%, transparent);
+
+    background: transparent;
+    color: var(--muted);
+}
+
+.atualizacao-sound-acoes button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+@keyframes sound-love-atualizacao-brilho {
+    0%,
+    60% {
+        transform: translateX(-180%);
+    }
+
+    85%,
+    100% {
+        transform: translateX(180%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .atualizacao-sound-emblema::after {
+        animation: none;
+        display: none;
+    }
+}

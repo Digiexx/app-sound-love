@@ -108,6 +108,81 @@ jobs:
               f"/* Publicação: {versao} */\n" + codigo,
               encoding="utf-8"
           )
+
+          # Identifica o conteúdo de cada arquivo publicado.
+          import hashlib
+
+          bloco_bytes = 1024 * 1024
+
+          extensoes = {
+              ".html", ".css", ".js", ".json",
+              ".png", ".jpg", ".jpeg", ".webp",
+              ".svg", ".ico", ".gif", ".avif",
+              ".woff", ".woff2", ".ttf", ".otf",
+              ".mp3", ".m4a", ".ogg", ".wav"
+          }
+
+          arquivos = []
+
+          for arquivo in sorted(destino.rglob("*")):
+              if not arquivo.is_file():
+                  continue
+
+              relativo = arquivo.relative_to(destino)
+              caminho = relativo.as_posix()
+
+              if any(
+                  parte.startswith(".")
+                  for parte in relativo.parts
+              ):
+                  continue
+
+              if caminho in {
+                  "versao.json",
+                  "catalogo-offline.json"
+              }:
+                  continue
+
+              if arquivo.suffix.lower() not in extensoes:
+                  continue
+
+              identificacao = hashlib.sha256()
+              blocos = []
+
+              # Lê músicas grandes em partes pequenas.
+              with arquivo.open("rb") as conteudo:
+                  for trecho in iter(
+                      lambda: conteudo.read(bloco_bytes),
+                      b""
+                  ):
+                      identificacao.update(trecho)
+
+                      blocos.append(
+                          hashlib.sha256(trecho).hexdigest()
+                      )
+
+              arquivos.append({
+                  "caminho": caminho,
+                  "sha256": identificacao.hexdigest(),
+                  "tamanho": arquivo.stat().st_size,
+                  "blocos": blocos
+              })
+
+          catalogo = {
+              "formato": 1,
+              "versao": versao,
+              "blocoBytes": bloco_bytes,
+              "arquivos": arquivos
+          }
+
+          (destino / "catalogo-offline.json").write_text(
+              json.dumps(
+                  catalogo,
+                  ensure_ascii=False,
+                  separators=(",", ":")
+              ),
+              encoding="utf-8"
+          )
           PY
 
       - name: Enviar arquivos para publicação

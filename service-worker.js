@@ -168,15 +168,117 @@ async function responderMusicaSalva(
    INTERNET E MODO OFFLINE
    ========================================= */
 
+async function encontrarArquivoAtualizado(requisicao) {
+
+    try {
+
+        const controle = await caches.open(
+            "sound-love-publicacao-v2"
+        );
+
+        const enderecoPublicacao = new URL(
+            "__sound-love-publicacao-ativa__",
+            self.registration.scope
+        ).href;
+
+        const registro = await controle.match(
+            enderecoPublicacao
+        );
+
+        if (!registro || registro.status !== 200) {
+            return null;
+        }
+
+        const publicacao = await registro.json();
+
+        if (!Array.isArray(publicacao.arquivos)) {
+            return null;
+        }
+
+        const endereco = new URL(requisicao.url);
+
+        const inicio = new URL(
+            self.registration.scope
+        );
+
+        const paginaInicial =
+            requisicao.mode === "navigate" &&
+            (
+                endereco.pathname === inicio.pathname ||
+                endereco.pathname ===
+                    new URL(ENDERECO_INICIAL).pathname
+            );
+
+        const caminho = paginaInicial
+            ? ENDERECO_INICIAL
+            : endereco.origin + endereco.pathname;
+
+        const arquivo = publicacao.arquivos.find(
+            (item) => {
+
+                return new URL(
+                    item.caminho,
+                    inicio
+                ).href === caminho;
+
+            }
+        );
+
+        if (
+            !arquivo ||
+            !/^[a-f0-9]{64}$/.test(arquivo.sha256)
+        ) {
+            return null;
+        }
+
+        const chave = new URL(
+            arquivo.caminho,
+            inicio
+        );
+
+        chave.searchParams.set(
+            "sl-conteudo",
+            arquivo.sha256
+        );
+
+        const cache = await caches.open(
+            "sound-love-arquivos-v2"
+        );
+
+        const resposta = await cache.match(
+            chave.href
+        );
+
+        return resposta && resposta.status === 200
+            ? resposta
+            : null;
+
+    } catch {
+
+        return null;
+
+    }
+
+}
+
 async function responderRequisicao(requisicao) {
 
     const endereco = new URL(requisicao.url);
 
-    // A identificação de atualização sempre vem
-    // da internet. Nunca utiliza uma versão antiga.
+    const enderecoCatalogo = new URL(
+        "catalogo-offline.json",
+        self.registration.scope
+    ).href;
+
+    const caminho =
+        endereco.origin + endereco.pathname;
+
+    // Consulta a publicação e baixa arquivos novos
+    // diretamente da internet.
     if (
-        endereco.origin + endereco.pathname ===
-        ENDERECO_VERSAO
+        caminho === ENDERECO_VERSAO ||
+        caminho === enderecoCatalogo ||
+        endereco.searchParams.has("sl-download")
     ) {
 
         return fetch(requisicao, {
@@ -189,9 +291,25 @@ async function responderRequisicao(requisicao) {
         requisicao.destination === "audio" ||
         /\.(mp3|m4a|ogg|wav)$/i.test(endereco.pathname);
 
+    // Usa a publicação ativada após concluir o download.
+    const atualizada = await encontrarArquivoAtualizado(
+        requisicao
+    );
+
+    if (atualizada) {
+
+        return musica
+            ? responderMusicaSalva(
+                requisicao,
+                atualizada
+            )
+            : atualizada;
+
+    }
+
+    // Mantém compatibilidade com o primeiro download.
     if (musica) {
 
-        // Músicas baixadas tocam diretamente do celular.
         const salva = await encontrarArquivoSalvo(
             requisicao
         );
@@ -205,7 +323,6 @@ async function responderRequisicao(requisicao) {
 
         }
 
-        // Música ainda não baixada precisa de internet.
         return fetch(requisicao, {
             cache: "no-cache"
         });
@@ -214,8 +331,6 @@ async function responderRequisicao(requisicao) {
 
     try {
 
-        // Com internet, busca as telas e os demais
-        // arquivos atuais da publicação.
         const resposta = await fetch(requisicao, {
             cache: "no-cache"
         });
@@ -236,7 +351,6 @@ async function responderRequisicao(requisicao) {
 
     } catch {
 
-        // Sem internet, utiliza o arquivo baixado.
         const salva = await encontrarArquivoSalvo(
             requisicao
         );

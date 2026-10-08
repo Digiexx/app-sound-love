@@ -226,10 +226,94 @@
 
     }
 
+    function retomarAcessoAtualizacao() {
+
+        let retomada;
+
+        try {
+
+            const salvo = sessionStorage.getItem(
+                "sound-love-retomar-acesso"
+            );
+
+            // A retomada só pode ser usada uma vez.
+            sessionStorage.removeItem(
+                "sound-love-retomar-acesso"
+            );
+
+            if (!salvo) {
+                return false;
+            }
+
+            retomada = JSON.parse(salvo);
+
+        } catch {
+
+            return false;
+
+        }
+
+        const versaoAtual = document
+            .querySelector('meta[name="sound-love-versao"]')
+            ?.content;
+
+        const endereco = new URL(
+            window.location.href
+        );
+
+        if (
+            !retomada ||
+            typeof retomada !== "object" ||
+            typeof retomada.versao !== "string" ||
+            !retomada.versao ||
+            retomada.versao !== versaoAtual ||
+            retomada.versao !==
+                endereco.searchParams.get("sl-atualizacao") ||
+            !Number.isFinite(retomada.expira) ||
+            retomada.expira <= Date.now() ||
+            retomada.expira - Date.now() > 30000
+        ) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    window.addEventListener(
+        "sound-love-atualizacao-liberada",
+        () => {
+
+            if (
+                window.SoundLoveAcessoLiberado === true &&
+                !document.getElementById(
+                    "instalacao-sound-love"
+                )
+            ) {
+                abrirConviteInstalacao();
+            }
+
+        }
+    );
+
     function abrirEntrada() {
 
         if (document.getElementById("entrada-sound-love")) {
             return;
+        }
+
+        if (retomarAcessoAtualizacao()) {
+
+            window.SoundLoveAcessoLiberado = true;
+
+            window.dispatchEvent(
+                new Event("sound-love-acesso-liberado")
+            );
+
+            abrirConviteInstalacao();
+
+            return;
+
         }
 
         const entrada = document.createElement("dialog");
@@ -684,6 +768,13 @@
 
             entrada.close();
             entrada.remove();
+
+            // A atualização poderá começar após o acesso.
+            window.SoundLoveAcessoLiberado = true;
+
+            window.dispatchEvent(
+                new Event("sound-love-acesso-liberado")
+            );
 
             abrirConviteInstalacao();
 
