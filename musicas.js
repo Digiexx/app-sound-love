@@ -7,7 +7,7 @@ window.SOUND_MUSICAS = [
     {
         id: "musica-001",
 
-        titulo: "Noite a dois",
+        titulo: "Noite a Dois",
 
         artista: "Sua coleção",
 
@@ -23,7 +23,7 @@ window.SOUND_MUSICAS = [
     {
         id: "musica-002",
 
-        titulo: "Beijo suave",
+        titulo: "Beijo Suave",
 
         artista: "Sua coleção",
 
@@ -36,16 +36,35 @@ window.SOUND_MUSICAS = [
         preferida: false
     },
 
+    
+    
+
     {
         id: "musica-003",
 
-        titulo: "Corpo do desejo",
+        titulo: "Corpo do Desejo",
 
         artista: "Sua coleção",
 
         arquivo: "musicas/corpo-do-desejo.mp3",
 
         capa: "capas/corpo-do-desejo.webp",
+
+        categorias: [],
+
+        preferida: false
+    },
+
+     {
+        id: "musica-004",
+
+        titulo: "Sussurro",
+
+        artista: "Sua coleção",
+
+        arquivo: "musicas/sussurro.mp3",
+
+        capa: "capas/sussurro.webp",
 
         categorias: [],
 
