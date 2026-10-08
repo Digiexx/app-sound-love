@@ -450,23 +450,83 @@
         const mostrarSenha =
             entrada.querySelector("#entrada-sound-mostrar");
 
-        mostrarSenha.addEventListener("click", () => {
+        const ocultacaoVisualDisponivel =
+            CSS.supports("-webkit-text-security", "disc");
 
-            const revelar = campo.type === "password";
+        let codigoVisivel = false;
 
-            campo.type = revelar ? "text" : "password";
+        campo.name = "codigo";
+        campo.inputMode = "numeric";
+        campo.autocomplete = "off";
+        campo.maxLength = SENHA_ACESSO.length;
+
+        campo.placeholder = "Digite seu código";
+        campo.spellcheck = false;
+
+        campo.setAttribute("autocapitalize", "off");
+
+        formulario.setAttribute("autocomplete", "off");
+
+        const rotuloCodigo = formulario.querySelector(
+            'label[for="entrada-sound-senha"]'
+        );
+
+        if (rotuloCodigo) {
+            rotuloCodigo.textContent = "Seu código de acesso";
+        }
+
+        function atualizarVisibilidadeCodigo() {
+
+            if (ocultacaoVisualDisponivel) {
+
+                campo.type = "text";
+
+                campo.style.setProperty(
+                    "-webkit-text-security",
+                    codigoVisivel ? "none" : "disc"
+                );
+
+            } else {
+
+                // Mantém os números ocultos nos navegadores
+                // que não oferecem a ocultação visual.
+                campo.type = codigoVisivel
+                    ? "text"
+                    : "password";
+
+            }
 
             mostrarSenha.setAttribute(
                 "aria-pressed",
-                String(revelar)
+                String(codigoVisivel)
             );
 
             mostrarSenha.setAttribute(
                 "aria-label",
-                revelar ? "Ocultar senha" : "Mostrar senha"
+                codigoVisivel
+                    ? "Ocultar código"
+                    : "Mostrar código"
             );
 
+        }
+
+        campo.addEventListener("input", () => {
+
+            campo.value = campo.value
+                .replace(/[^0-9]/g, "")
+                .slice(0, SENHA_ACESSO.length);
+
         });
+
+        mostrarSenha.addEventListener("click", () => {
+
+            codigoVisivel = !codigoVisivel;
+
+            atualizarVisibilidadeCodigo();
+
+        });
+
+        atualizarVisibilidadeCodigo();
 
         formulario.addEventListener("submit", (evento) => {
 
