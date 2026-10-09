@@ -1,0 +1,71 @@
+/* SOUND LOVE — ACESSO RÁPIDO */
+
+#entrada-sound-love .sound-biometria {
+    margin: 22px 0;
+    text-align: center;
+}
+
+#entrada-sound-love .sound-biometria[hidden],
+#entrada-sound-love #entrada-sound-form[hidden] {
+    display: none !important;
+}
+
+#entrada-sound-love .sound-biometria h2 {
+    margin: 0 0 12px;
+    color: var(--text);
+    font: inherit;
+    font-size: 21px;
+}
+
+#entrada-sound-love .sound-biometria button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    margin: 10px 0 0;
+    padding: 12px 16px;
+    border-radius: 15px;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+#entrada-sound-love .sound-biometria-principal {
+    border: 1px solid var(--accent);
+    background: linear-gradient(125deg, var(--accent), var(--accent2));
+    color: var(--bg);
+    box-shadow: 0 4px 20px var(--glow);
+}
+
+#entrada-sound-love .sound-biometria-secundario {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    box-shadow: none;
+}
+
+#entrada-sound-love .sound-biometria button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+#entrada-sound-love .sound-biometria button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+#entrada-sound-love .sound-biometria-ajuda,
+#entrada-sound-love .sound-biometria-status {
+    margin: 13px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+#entrada-sound-love .sound-biometria-status:empty {
+    display: none;
+}

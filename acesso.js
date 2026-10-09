@@ -740,24 +740,15 @@
 
         atualizarVisibilidadeCodigo();
 
-        formulario.addEventListener("submit", (evento) => {
+        function concluirEntrada() {
 
-            evento.preventDefault();
-
-            if (campo.value !== SENHA_ACESSO) {
-
-                erro.textContent =
-                    "Senha incorreta. Tente novamente.";
-
-                campo.setAttribute("aria-invalid", "true");
-                campo.focus();
-                campo.select();
-
+            if (acessoLiberado) {
                 return;
-
             }
 
             campo.value = "";
+
+            biometria?.encerrar();
 
             liberarConteudo();
 
@@ -777,6 +768,63 @@
             );
 
             abrirConviteInstalacao();
+
+        }
+
+        const biometria = window.SoundLoveBiometria?.preparar(
+            entrada,
+            formulario,
+            concluirEntrada
+        );
+
+        let validandoAcesso = false;
+
+        formulario.addEventListener("submit", async (evento) => {
+
+            evento.preventDefault();
+
+            if (
+                validandoAcesso ||
+                acessoLiberado ||
+                biometria?.estaOcupado()
+            ) {
+                return;
+            }
+
+            if (campo.value !== SENHA_ACESSO) {
+
+                erro.textContent =
+                    "Senha incorreta. Tente novamente.";
+
+                campo.setAttribute("aria-invalid", "true");
+                campo.focus();
+                campo.select();
+
+                return;
+
+            }
+
+            validandoAcesso = true;
+            campo.value = "";
+            erro.textContent = "";
+
+            try {
+
+                // O cadastro só é oferecido depois do código correto.
+                await biometria?.aoCodigoValido();
+
+                concluirEntrada();
+
+            } catch {
+
+                erro.textContent =
+                    "Não foi possível preparar o acesso rápido. Entre novamente com seu código.";
+
+            } finally {
+
+                validandoAcesso = false;
+
+            }
 
         });
 
