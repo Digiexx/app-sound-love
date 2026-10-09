@@ -50,7 +50,8 @@ jobs:
               ".vscode",
               "node_modules",
               "corel",
-              "_site"
+              "_site",
+              "Sound-Love-Android"
           }
 
           destino.mkdir(exist_ok=True)
