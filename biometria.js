@@ -234,43 +234,125 @@
     function preparar(entrada, formulario, finalizar) {
         let ocupado = false;
         let encerrado = false;
+        let suporteConfirmado = false;
+        let tentativaAutomaticaFeita = false;
+        let inicioAutomatico = null;
         const pronto = disponivel();
+        const descricao = entrada.querySelector(".entrada-sound-descricao");
+        const descricaoOriginal = descricao?.textContent;
+        const campoCodigo = formulario.querySelector("#entrada-sound-senha");
         const area = document.createElement("section");
         area.className = "sound-biometria";
         area.hidden = true;
         area.innerHTML = `
-            <button type="button" class="sound-biometria-principal">
-                <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                    aria-hidden="true">
-                    <path d="M7 5a8 8 0 0 1 13 6v3M4 10a8 8 0 0 1 1-3"/>
-                    <path d="M8 20c2-3 2-6 2-9a2 2 0 0 1 4 0c0 5-1 8-3 11"/>
-                    <path d="M5 17c1-2 1-4 1-6a6 6 0 0 1 12 0c0 4-.5 7-2 10"/>
-                    <path d="M3 13v2M12 11c0 3-.2 5-1 7"/>
+            <button type="button" class="sound-biometria-circulo"
+                aria-label="Desbloquear pelo aparelho">
+                <svg viewBox="0 0 100 100" fill="none" stroke="currentColor"
+                    stroke-width="3.2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M27 24C40 11 60 11 73 24"/>
+                    <path d="M19 43C21 25 36 19 50 19s29 6 31 24"/>
+                    <path d="M22 59V45c0-16 13-22 28-22s28 6 28 22v13"/>
+                    <path d="M29 70c-2-8-1-15-1-25 0-12 10-16 22-16s22 4 22 16c0 17 2 22 7 28"/>
+                    <path d="M35 79c-5-10-1-24-1-33 0-8 7-11 16-11s16 3 16 11c0 18 0 26 7 35"/>
+                    <path d="M43 84c-7-10-3-23-3-38 0-4 4-6 10-6s10 2 10 6c0 20-2 31 6 39"/>
+                    <path d="M51 85c-6-12-4-27-4-37 0-2 6-2 6 0 0 19-1 24 4 33"/>
                 </svg>
-                Desbloquear pelo aparelho
             </button>
-            <p class="sound-biometria-ajuda">Digital, rosto ou PIN do aparelho.<br>Você também pode usar seu código abaixo.</p>
+            <p class="sound-biometria-confirmar">Confirme com seu aparelho</p>
+            <button type="button" class="sound-biometria-principal"
+                data-biometria-desbloquear>Desbloquear</button>
+            <p class="sound-biometria-ajuda">Digital, rosto ou PIN do aparelho.</p>
             <p class="sound-biometria-status" role="status" aria-live="polite"></p>
+            <button type="button" class="sound-biometria-texto"
+                data-biometria-codigo aria-controls="entrada-sound-form">
+                Usar código de acesso
+            </button>
         `;
         formulario.before(area);
-        const botao = area.querySelector("button");
+        const botao = area.querySelector("[data-biometria-desbloquear]");
+        const circulo = area.querySelector(".sound-biometria-circulo");
+        const usarCodigo = area.querySelector("[data-biometria-codigo]");
         const status = area.querySelector(".sound-biometria-status");
+        const voltar = document.createElement("button");
+        voltar.type = "button";
+        voltar.className = "sound-biometria-texto";
+        voltar.textContent = "Voltar ao desbloqueio pelo aparelho";
+        voltar.hidden = true;
+        formulario.appendChild(voltar);
+
+        function mostrarModo(aparelho, focar = true) {
+            entrada.dataset.acessoModo = aparelho ? "biometria" : "codigo";
+            area.hidden = !aparelho;
+            formulario.hidden = aparelho;
+            voltar.hidden = aparelho || !lerRegistro();
+            status.textContent = "";
+            if (descricao) {
+                descricao.textContent = aparelho ? "Seu momento espera." : descricaoOriginal;
+            }
+            if (focar) (aparelho ? botao : campoCodigo)?.focus();
+        }
+
+        // Mantém a preferência nas próximas entradas sem cadastrar de novo.
+        const possuiCadastro = Boolean(lerRegistro());
+        mostrarModo(possuiCadastro, false);
+        botao.disabled = true;
+        circulo.disabled = true;
+
+        usarCodigo.addEventListener("click", () => {
+            if (!ocupado && !encerrado) mostrarModo(false);
+        });
+
+        voltar.addEventListener("click", () => {
+            if (!ocupado && !encerrado) mostrarModo(true);
+        });
 
         function bloquearFormulario(bloquear) {
             formulario.querySelectorAll("input, button").forEach((elemento) => {
                 elemento.disabled = bloquear;
             });
             botao.disabled = bloquear;
+            circulo.disabled = bloquear;
+            usarCodigo.disabled = bloquear;
             area.setAttribute("aria-busy", String(bloquear));
         }
 
         pronto.then((suporta) => {
-            if (!encerrado && entrada.isConnected) area.hidden = !(suporta && lerRegistro());
+            if (encerrado || !entrada.isConnected) return;
+            suporteConfirmado = suporta;
+            botao.disabled = false;
+            circulo.disabled = false;
+            if (!suporta || !lerRegistro()) {
+                mostrarModo(false, false);
+                voltar.hidden = true;
+            }
+            // Aguarda a entrada abrir; nunca solicita em uma aba escondida.
+            inicioAutomatico = window.setTimeout(tentarAutomaticamente, 0);
         });
 
-        botao.addEventListener("click", async () => {
+        function removerEscutasAutomaticas() {
+            document.removeEventListener("visibilitychange", tentarAutomaticamente);
+            window.removeEventListener("focus", tentarAutomaticamente);
+            window.removeEventListener("pageshow", tentarAutomaticamente);
+            if (inicioAutomatico !== null) window.clearTimeout(inicioAutomatico);
+        }
+
+        function tentarAutomaticamente() {
+            if (tentativaAutomaticaFeita || encerrado || ocupado ||
+                !suporteConfirmado || !lerRegistro() || !entrada.isConnected ||
+                !entrada.open || entrada.dataset.acessoModo !== "biometria" ||
+                document.visibilityState !== "visible" || !document.hasFocus()) return;
+            desbloquear();
+        }
+
+        document.addEventListener("visibilitychange", tentarAutomaticamente);
+        window.addEventListener("focus", tentarAutomaticamente);
+        window.addEventListener("pageshow", tentarAutomaticamente);
+
+        async function desbloquear() {
             if (ocupado || encerrado) return;
+            // Cancelamentos não causam solicitações repetidas.
+            tentativaAutomaticaFeita = true;
+            removerEscutasAutomaticas();
             ocupado = true;
             bloquearFormulario(true);
             status.textContent = "Confirme o desbloqueio no aparelho…";
@@ -283,12 +365,17 @@
                 ocupado = false;
                 bloquearFormulario(false);
             }
-        });
+        }
+
+        botao.addEventListener("click", desbloquear);
+        circulo.addEventListener("click", desbloquear);
 
         async function aoCodigoValido() {
             // Esta função deve ser chamada apenas depois de validar o código.
             if (encerrado || !(await pronto)) return;
             ocupado = true;
+            entrada.dataset.acessoModo = "cadastro";
+            if (descricao) descricao.textContent = descricaoOriginal;
             area.hidden = true;
             formulario.hidden = true;
             const anterior = lerRegistro();
@@ -350,7 +437,10 @@
             aoCodigoValido,
             encerrar() {
                 encerrado = true;
+                removerEscutasAutomaticas();
                 area.remove();
+                voltar.remove();
+                delete entrada.dataset.acessoModo;
             }
         });
     }

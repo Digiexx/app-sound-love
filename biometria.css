@@ -69,3 +69,142 @@
 #entrada-sound-love .sound-biometria-status:empty {
     display: none;
 }
+
+/* Entrada com destaque para o desbloqueio já cadastrado. */
+
+#entrada-sound-love[data-acesso-modo="biometria"] .entrada-sound-coracao,
+#entrada-sound-love[data-acesso-modo="biometria"] .entrada-sound-rodape,
+#entrada-sound-love .sound-biometria-texto[hidden] {
+    display: none !important;
+}
+
+#entrada-sound-love[data-acesso-modo="biometria"] .entrada-sound-conteudo {
+    padding-top: 30px;
+    padding-bottom: 24px;
+}
+
+#entrada-sound-love[data-acesso-modo="biometria"] .entrada-sound-assinatura {
+    margin-bottom: 18px;
+}
+
+#entrada-sound-love[data-acesso-modo="biometria"] .entrada-sound-descricao {
+    margin-bottom: 0;
+}
+
+#entrada-sound-love[data-acesso-modo="biometria"] .sound-biometria {
+    margin: 28px 0 0;
+}
+
+#entrada-sound-love .sound-biometria button.sound-biometria-circulo {
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    width: min(210px, 70%);
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1;
+    margin: 0 auto 26px;
+    padding: 36px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 30%,
+            color-mix(in srgb, var(--accent) 16%, transparent),
+            transparent 72%),
+        var(--bg);
+    color: var(--accent);
+    box-shadow:
+        0 0 20px var(--glow),
+        0 0 55px var(--glow),
+        inset 0 0 24px var(--glow);
+    transition: box-shadow 180ms ease, transform 180ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#entrada-sound-love .sound-biometria-circulo::before,
+#entrada-sound-love .sound-biometria-circulo::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+#entrada-sound-love .sound-biometria-circulo::before {
+    inset: -13px;
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+#entrada-sound-love .sound-biometria-circulo::after {
+    inset: 7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+#entrada-sound-love .sound-biometria-circulo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 0 4px var(--accent))
+        drop-shadow(0 0 10px var(--glow));
+}
+
+#entrada-sound-love .sound-biometria-circulo:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+#entrada-sound-love .sound-biometria[aria-busy="true"] .sound-biometria-circulo {
+    animation: sound-love-biometria-pulso 1.5s ease-in-out infinite;
+}
+
+#entrada-sound-love .sound-biometria-confirmar {
+    margin: 0 0 14px;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+#entrada-sound-love button.sound-biometria-texto {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 16px 0 0;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    box-shadow: none;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+#entrada-sound-love button.sound-biometria-texto:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@keyframes sound-love-biometria-pulso {
+    50% {
+        box-shadow: 0 0 32px var(--glow), 0 0 70px var(--glow),
+            inset 0 0 36px var(--glow);
+    }
+}
+
+@media (max-height: 700px) {
+    #entrada-sound-love .sound-biometria button.sound-biometria-circulo {
+        width: min(165px, 65%);
+        margin-bottom: 20px;
+        padding: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #entrada-sound-love .sound-biometria button.sound-biometria-circulo {
+        animation: none !important;
+        transition: none;
+    }
+}
