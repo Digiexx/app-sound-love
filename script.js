@@ -329,6 +329,59 @@ const paginasMenu = [
         menuDesktop.innerHTML = html;
         menuCelular.innerHTML = html;
 
+        const entradaMomentos = menuCelular.querySelector(
+            'a[href="#momentos"]'
+        );
+
+        if (entradaMomentos) {
+
+            const botaoTema = document.createElement("button");
+
+            botaoTema.type = "button";
+            botaoTema.className = "menu-tema";
+            botaoTema.dataset.action = "open-themes";
+
+            botaoTema.setAttribute(
+                "aria-label",
+                "Tema: escolher seu clima"
+            );
+
+            botaoTema.setAttribute(
+                "aria-haspopup",
+                "dialog"
+            );
+
+            botaoTema.setAttribute(
+                "aria-controls",
+                "painel-climas"
+            );
+
+            botaoTema.innerHTML = `
+                <span aria-hidden="true">
+                    <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 0-5H13a1 1 0 0 1 0-2h2a6 6 0 0 0 6-6c0-3-4-5-9-5Z"/>
+                        <circle cx="7.5" cy="8.5" r="0.8"/>
+                        <circle cx="11" cy="6.5" r="0.8"/>
+                        <circle cx="15" cy="7.5" r="0.8"/>
+                        <circle cx="6.5" cy="12.5" r="0.8"/>
+                    </svg>
+                </span>
+                Tema
+            `;
+
+            entradaMomentos.replaceWith(botaoTema);
+
+        }
+
     }
 
 
@@ -1240,15 +1293,13 @@ function navegar(destino) {
     function paginaBiblioteca() {
 
         return `
-            <h1>${
+            <h1 class="colecao-titulo">${
                 estado.pagina === "preferidas"
                     ? "Suas preferidas"
                     : "Minha coleção"
             }</h1>
 
-            <p>Encontre a música para o seu momento.</p>
-
-            <div class="toolbar">
+            <div class="toolbar colecao-busca">
 
                 <input
                     type="search"
@@ -1258,30 +1309,7 @@ function navegar(destino) {
                     value="${textoSeguro(estado.busca)}"
                 >
 
-                <select
-                    id="sort"
-                    aria-label="Ordenar músicas"
-                >
 
-                    <option
-                        value="az"
-                        ${estado.ordem === "az"
-                            ? "selected"
-                            : ""}
-                    >
-                        A–Z
-                    </option>
-
-                    <option
-                        value="za"
-                        ${estado.ordem === "za"
-                            ? "selected"
-                            : ""}
-                    >
-                        Z–A
-                    </option>
-
-                </select>
 
             </div>
 

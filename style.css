@@ -256,32 +256,238 @@ button.active,
     font-size: 11px;
 }
 
+/* =========================================
+   CENÁRIO E CABEÇALHO DO SOUND LOVE
+   ========================================= */
+
 main {
+    position: relative;
+    isolation: isolate;
+
     min-width: 0;
+
     padding: 30px 48px 180px;
 }
 
-header {
+/* O cenário acompanha o topo de todas as páginas. */
+/* Imagem inicial, antes de carregar o tema salvo. */
+:root {
+    --cabecalho-imagem:
+        url("imagens/cabeçalho/carinho.png");
+}
+
+/* Cada tema escolhe seu próprio cenário. */
+:root[data-clima="desejo"] {
+    --cabecalho-imagem:
+        url("imagens/cabeçalho/desejo.png");
+
+    --cabecalho-posicao: center 42%;
+}
+
+:root[data-clima="paixao"] {
+    --cabecalho-imagem:
+        url("imagens/cabeçalho/paixao.png");
+
+    --cabecalho-posicao: center 42%;
+}
+
+:root[data-clima="carinho"] {
+    --cabecalho-imagem:
+        url("imagens/cabeçalho/carinho.png");
+
+    --cabecalho-posicao: center 25%;
+}
+
+:root[data-clima="prazer"] {
+    --cabecalho-imagem:
+        url("imagens/cabeçalho/prazer.png");
+
+    --cabecalho-posicao: center 10%;
+}
+
+/* Cenário com escurecimento para facilitar a leitura. */
+main::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 400px;
+
+    z-index: -1;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.28) 0%,
+            rgba(0, 0, 0, 0.48) 45%,
+            var(--bg) 100%
+        ),
+        var(--cabecalho-imagem);
+
+    background-position:
+        center,
+        var(--cabecalho-posicao, center 42%);
+
+    background-size:
+        cover,
+        cover;
+
+    background-repeat: no-repeat;
+}
+
+main > header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
+    gap: 12px;
+
+    min-height: 64px;
+
     margin-bottom: 28px;
+    padding: 10px 16px;
+
+    border: 1px solid rgba(255, 190, 205, 0.18);
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(48, 9, 23, 0.82),
+            rgba(16, 5, 10, 0.68)
+        );
+
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.header-actions {
+main > header .brand {
+    min-width: 0;
+
+    color: #ffffff;
+
+    font-size: clamp(16px, 2vw, 21px);
+    line-height: 1.2;
+
+    white-space: nowrap;
+
+    text-decoration: none;
+
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+main > header .brand b {
+    color: #ff527b;
+}
+
+main > header .header-actions {
     display: flex;
-    gap: 4px;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    gap: 6px;
 }
 
-header button {
-    padding: 5px 12px;
+main > header button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 0;
+    width: 44px;
+    min-width: 44px;
+
+    height: 44px;
+    min-height: 44px;
+
+    margin: 0;
+    padding: 0;
+
+    border: 1px solid transparent;
+    border-radius: 50%;
 
     background: transparent;
 
+    color: #ffffff;
+
+    font-family: inherit;
     font-size: 23px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease;
+}
+
+main > header button svg {
+    display: block;
+
+    flex-shrink: 0;
+}
+
+main > header button.mood-trigger {
+    color: #ff527b;
+}
+
+main > header button:focus-visible,
+main > header .brand:focus-visible {
+    outline: 2px solid #ff7899;
+    outline-offset: 4px;
+}
+
+@media (hover: hover) {
+    main > header button:hover {
+        border-color: rgba(255, 190, 205, 0.22);
+
+        background: rgba(255, 82, 123, 0.12);
+    }
+}
+
+/* Cabeçalho compacto para celulares. */
+@media (max-width: 700px) {
+    main::before {
+        height: 340px;
+
+        background-position:
+            center,
+            var(--cabecalho-posicao, center 42%);
+    }
+
+    main > header {
+        gap: 8px;
+
+        min-height: 58px;
+
+        margin-bottom: 24px;
+        padding: 6px 10px 6px 14px;
+
+        border-radius: 20px;
+    }
+
+    main > header .brand {
+        font-size: 17px;
+    }
+
+    main > header .header-actions {
+        gap: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    main > header button {
+        transition: none;
+    }
 }
 
 
@@ -4362,4 +4568,85 @@ dialog.painel-sound[open] {
         animation: none;
         display: none;
     }
+}
+/* =========================================
+   COLEÇÃO — TOPO COMPACTO E BOTÃO DE TEMA
+   ========================================= */
+
+#page > .colecao-titulo {
+    margin: 0 0 10px;
+
+    padding-top: 140px;
+}
+
+#page > .colecao-busca {
+    margin: 0 0 14px;
+}
+
+#page > .colecao-busca #search {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    background: rgba(12, 8, 12, 0.35);
+    color: var(--text);
+
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#page > .colecao-busca #search::placeholder {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+#page > .colecao-busca #search:focus {
+    border-color: var(--accent);
+}
+
+#bottom-nav .menu-tema {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: 44px;
+
+    margin: 0;
+    padding: 3px 12px;
+
+    border: 0;
+    border-radius: 12px;
+
+    background: transparent;
+    color: var(--muted);
+
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.5;
+
+    cursor: pointer;
+}
+
+#bottom-nav .menu-tema > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 32px;
+}
+
+#bottom-nav .menu-tema svg {
+    display: block;
+
+    width: 22px;
+    height: 22px;
+}
+
+#bottom-nav .menu-tema:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
